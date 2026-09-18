@@ -100,24 +100,56 @@ def test_install_global_command_posix_reinstall_does_not_duplicate(tmp_path):
     assert content.count(COMMAND_MARKER_END) == 1
 
 
-bash_missing = shutil.which("bash") is None
+def _usable_bash() -> bool:
+    """True only when a *functional* POSIX bash is reachable.
+
+    On Windows CI ``shutil.which("bash")`` can resolve to the WSL launcher stub
+    (System32\\bash.exe). That stub exists on PATH but, with no installed Linux
+    distribution, prints a UTF-16 "Windows Subsystem for Linux has no installed
+    distributions" notice and exits non-zero. A mere presence check would run the
+    tests against it and fail spuriously, so we execute a probe command instead.
+    """
+    exe = shutil.which("bash")
+    if exe is None:
+        return False
+    try:
+        probe = subprocess.run(
+            [exe, "-c", "printf bash_ok"],
+            capture_output=True,
+            text=True,
+            timeout=15,
+        )
+    except (subprocess.SubprocessError, OSError):
+        return False
+    return probe.returncode == 0 and "bash_ok" in (probe.stdout or "")
 
 
-@pytest.mark.skipif(bash_missing, reason="bash not available on this runner")
+bash_usable = _usable_bash()
+requires_bash = pytest.mark.skipif(
+    not bash_usable, reason="no functional POSIX bash on this runner"
+)
+
+
+@requires_bash
 def test_generated_local_script_has_valid_bash_syntax(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
 
     install_local_command_posix("mycmd", tmp_path / "thero.py")
 
     target = tmp_path / "mycmd.local.sh"
+    # Pass a relative name with cwd set: Git Bash on Windows cannot resolve a
+    # backslash-qualified absolute path (str(target)) and exits 127.
     result = subprocess.run(
-        ["bash", "-n", str(target)], capture_output=True, text=True
+        ["bash", "-n", target.name],
+        capture_output=True,
+        text=True,
+        cwd=tmp_path,
     )
 
     assert result.returncode == 0, result.stderr
 
 
-@pytest.mark.skipif(bash_missing, reason="bash not available on this runner")
+@requires_bash
 def test_generated_local_script_function_runs_in_real_bash(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
 
@@ -135,7 +167,7 @@ def test_generated_local_script_function_runs_in_real_bash(tmp_path, monkeypatch
     assert "mycmd" in result.stdout
 
 
-@pytest.mark.skipif(bash_missing, reason="bash not available on this runner")
+@requires_bash
 def test_generated_global_rc_block_has_valid_bash_syntax(tmp_path):
     rc_path = tmp_path / ".zshrc"
 
@@ -145,7 +177,10 @@ def test_generated_global_rc_block_has_valid_bash_syntax(tmp_path):
         install_global_command_posix("mycmd", tmp_path / "thero.py")
 
     result = subprocess.run(
-        ["bash", "-n", str(rc_path)], capture_output=True, text=True
+        ["bash", "-n", rc_path.name],
+        capture_output=True,
+        text=True,
+        cwd=tmp_path,
     )
 
     assert result.returncode == 0, result.stderr

@@ -56,9 +56,14 @@ def install_local_command_posix(
         "script_path": str(entry_path),
     }
 
+    # Force LF newlines: this is a POSIX shell script and a CRLF terminator
+    # breaks bash ("syntax error near unexpected token `$'{\r'`") when thero
+    # is run under Git Bash on Windows. write_text() would otherwise emit the
+    # host os.linesep.
     target.write_text(
         content,
         encoding="utf-8",
+        newline="\n",
     )
 
     print(
@@ -136,6 +141,7 @@ def install_global_command_posix(
     rc_path.write_text(
         updated,
         encoding="utf-8",
+        newline="\n",
     )
 
     print(
