@@ -22,8 +22,9 @@ engenharia de software profissional. Ele:
   alteração de código;
 - pode operar globalmente (usuário, `~/.claude`) ou localmente (projeto
   atual, `--local`);
-- instala um comando de atalho no PowerShell (global ou local ao projeto)
-  para rodar o script de qualquer lugar;
+- instala um comando de atalho (PowerShell no Windows; bash/zsh no
+  macOS/Linux), global ou local ao projeto, para rodar o script de
+  qualquer lugar;
 - favorece mudanças pequenas e verificáveis.
 
 ## Requisitos
@@ -32,8 +33,10 @@ engenharia de software profissional. Ele:
 - Node.js e `npx` (necessários para instalar skills via `npx skills add`)
 - Claude Code instalado e autenticado (necessário para consolidar o
   `CLAUDE.md` e para rodar auditorias — `claude -p`)
-- Comando de atalho (`--install-command`): só Windows/PowerShell por
-  enquanto; suporte a macOS/Linux (bash/zsh) está planejado
+- Comando de atalho (`--install-command`): Windows (PowerShell) ou
+  macOS/Linux (bash/zsh, detectado via `$SHELL`); suporte
+  macOS/Linux é novo, validado via Git Bash no Windows, zsh/bash
+  reais ainda não testados
 
 Se `claude` não estiver disponível, a instalação de skills ainda funciona;
 apenas a consolidação do `CLAUDE.md` e a auditoria são puladas (com aviso).
@@ -180,8 +183,10 @@ script a partir de qualquer pasta, usando a pasta atual como alvo
 projeto).
 
 **Global** (padrão, sem `--local`): cria/atualiza uma função no seu
-`$PROFILE` do PowerShell. Funciona em qualquer pasta, em qualquer sessão,
-depois de recarregar o terminal (`. $PROFILE` ou abrir um novo).
+`$PROFILE` do PowerShell (Windows) ou em `~/.zshrc` / `~/.bashrc` /
+`~/.profile` (macOS/Linux, detectado via `$SHELL`). Funciona em
+qualquer pasta, em qualquer sessão, depois de recarregar o terminal
+(`. $PROFILE` / `source ~/.zshrc` ou abrir um novo).
 
 ```
 thero              -> thero.py (instala tudo)
@@ -196,12 +201,13 @@ thero help         -> --help
 thero -h           -> repassado cru (qualquer flag não mapeada)
 ```
 
-**Local** (`--install-command --local`): cria `<nome>.local.ps1` na pasta
-do projeto atual, em vez de mexer no `$PROFILE`. Carregue na sessão com
-`. .\thero.local.ps1`. A função só executa se o diretório atual for
-aquele projeto (ou uma subpasta dele); fora dali, recusa com erro. Cada
-chamada já roda o script com `--local` (skills e CLAUDE.md também ficam
-locais ao projeto).
+**Local** (`--install-command --local`): cria `<nome>.local.ps1`
+(Windows) ou `<nome>.local.sh` (macOS/Linux) na pasta do projeto
+atual, em vez de mexer no perfil global. Carregue na sessão com
+`. .\thero.local.ps1` ou `source ./thero.local.sh`. A função só
+executa se o diretório atual for aquele projeto (ou uma subpasta
+dele); fora dali, recusa com erro. Cada chamada já roda o script com
+`--local` (skills e CLAUDE.md também ficam locais ao projeto).
 
 Rodar a instalação de novo (global ou local) atualiza a função existente
 — não duplica, mesmo trocando de nome.
@@ -316,7 +322,7 @@ thero/
 │   ├── skills/                 # catálogo + instalador de Agent Skills
 │   ├── claude_md/               # cliente `claude -p` + merge do CLAUDE.md
 │   ├── audit/                    # auditoria de projeto (read-only)
-│   ├── shell_command/             # comando de atalho (PowerShell global/local)
+│   ├── shell_command/             # comando de atalho (PowerShell + bash/zsh, global/local)
 │   ├── integrations/               # ponte com ferramentas externas (Athena)
 │   └── system/                      # processo, backup, ambiente
 ├── README.md
@@ -334,8 +340,10 @@ e crescimento sem acoplar regras de negócio diferentes no mesmo arquivo.
   repositórios funcionam parcialmente (algumas skills individuais podem
   ter sido renomeadas/removidas). Use `SKILLS_INSTALL_FAILED.md` para ver
   exatamente o que falhou.
-- Comando de atalho (`--install-command`) só suporta Windows/PowerShell
-  por enquanto.
+- Comando de atalho (`--install-command`) no macOS/Linux é novo:
+  validado via Git Bash no Windows (`bash -n` e execução real da
+  função gerada), mas zsh/bash reais em macOS/Linux ainda não foram
+  testados.
 
 ## Troubleshooting
 
@@ -375,9 +383,8 @@ Falha ao substituir o arquivo (por exemplo, permissão de arquivo). O
 `CLAUDE.md` original é preservado; verifique permissões em `~/.claude/`.
 
 **`[ERROR] Could not resolve the PowerShell $PROFILE path`**
-`--install-command` (sem `--local`) só suporta Windows PowerShell; rode o
-script em um PowerShell normal, não dentro de outro shell ou ambiente
-restrito.
+Só ocorre no Windows; rode o script em um PowerShell normal, não dentro
+de outro shell ou ambiente restrito.
 
 **`'thero' e um comando local do projeto '...'`**
 Você tentou usar um comando instalado com `--install-command --local`

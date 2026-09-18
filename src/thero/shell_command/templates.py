@@ -110,3 +110,82 @@ Write-Host (
 
 assert GLOBAL_COMMAND_TEMPLATE.startswith(COMMAND_MARKER_START)
 assert COMMAND_MARKER_END in GLOBAL_COMMAND_TEMPLATE
+
+GLOBAL_COMMAND_TEMPLATE_POSIX = r"""# >>> setup_claude global command >>>
+# Gerado automaticamente por thero.py --install-command
+# Nao edite manualmente entre estes marcadores; rode novamente
+# "python3 thero.py --install-command" para atualizar.
+%s() {
+    local cmd="$1"
+    if [ "$#" -gt 0 ]; then
+        shift
+    fi
+
+    local script_path="%s"
+
+    case "$cmd" in
+        "") set -- ;;
+        install) set -- ;;
+        skills) set -- --skills-only ;;
+        merge) set -- --merge-only ;;
+        audit) set -- --audit ;;
+        audit-only) set -- --audit-only ;;
+        index) set -- --index ;;
+        check) set -- --check ;;
+        update) set -- --update ;;
+        help) set -- --help ;;
+        *) set -- "$cmd" "$@" ;;
+    esac
+
+    python3 "$script_path" "$@"
+}
+# <<< setup_claude global command <<<
+"""
+
+LOCAL_COMMAND_TEMPLATE_POSIX = r"""# Comando local do projeto: %(project_dir)s
+# Gerado automaticamente por thero.py --install-command --local
+# Nao versione segredos aqui; este arquivo so referencia caminhos
+# locais da sua maquina. Carregue nesta sessao com:
+#     source ./%(local_filename)s
+%(command_name)s() {
+    local project_dir="%(project_dir)s"
+    local current_dir
+    current_dir="$(pwd -P)"
+
+    case "$current_dir" in
+        "$project_dir"|"$project_dir"/*) ;;
+        *)
+            echo "'%(command_name)s' e um comando local do projeto '$project_dir'. Rode a partir dessa pasta (ou de uma subpasta dela)." >&2
+            return 1
+            ;;
+    esac
+
+    local cmd="$1"
+    if [ "$#" -gt 0 ]; then
+        shift
+    fi
+
+    local script_path="%(script_path)s"
+
+    case "$cmd" in
+        "") set -- ;;
+        install) set -- ;;
+        skills) set -- --skills-only ;;
+        merge) set -- --merge-only ;;
+        audit) set -- --audit ;;
+        audit-only) set -- --audit-only ;;
+        index) set -- --index ;;
+        check) set -- --check ;;
+        update) set -- --update ;;
+        help) set -- --help ;;
+        *) set -- "$cmd" "$@" ;;
+    esac
+
+    python3 "$script_path" --local "$@"
+}
+
+echo "[OK] Comando local '%(command_name)s' carregado (valido em '%(project_dir)s')."
+"""
+
+assert GLOBAL_COMMAND_TEMPLATE_POSIX.startswith(COMMAND_MARKER_START)
+assert COMMAND_MARKER_END in GLOBAL_COMMAND_TEMPLATE_POSIX

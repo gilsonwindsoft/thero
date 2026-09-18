@@ -1,46 +1,47 @@
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 from thero.shell_command import upsert_marked_block
 from thero.shell_command.templates import (
-    GLOBAL_COMMAND_TEMPLATE,
-    LOCAL_COMMAND_TEMPLATE,
+    GLOBAL_COMMAND_TEMPLATE_POSIX,
+    LOCAL_COMMAND_TEMPLATE_POSIX,
 )
 from thero.system.backup import backup_file
-from thero.system.process import run_command
+
+POSIX_SUPPORT_WARNING = (
+    "[WARN] Suporte a macOS/Linux e novo e foi validado via Git Bash "
+    "no Windows; zsh/bash reais em macOS/Linux ainda nao foram "
+    "testados. Reporte problemas se encontrar algum."
+)
 
 
-def resolve_powershell_profile() -> Path | None:
+def resolve_shell_rc_file() -> Path:
+    """
+    Escolhe o arquivo de perfil do shell a editar, com base na
+    variavel de ambiente $SHELL. Sem match conhecido (zsh/bash),
+    usa ~/.profile (criado se ainda nao existir).
+    """
 
-    result = run_command(
-        [
-            "powershell",
-            "-NoProfile",
-            "-Command",
-            "$PROFILE",
-        ],
-        capture=True,
-    )
+    shell = os.environ.get("SHELL", "")
 
-    if result.returncode != 0:
-        return None
+    if "zsh" in shell:
+        return Path.home() / ".zshrc"
 
-    output = (result.stdout or "").strip()
+    if "bash" in shell:
+        return Path.home() / ".bashrc"
 
-    if not output:
-        return None
-
-    return Path(output)
+    return Path.home() / ".profile"
 
 
-def install_local_command_windows(
+def install_local_command_posix(
     command_name: str,
     entry_path: Path,
 ) -> None:
 
     project_dir = Path.cwd().resolve()
-    target = project_dir / f"{command_name}.local.ps1"
+    target = project_dir / f"{command_name}.local.sh"
 
     if target.exists():
         backup_file(
@@ -48,13 +49,11 @@ def install_local_command_windows(
             prefix=target.stem,
         )
 
-    script_path = str(entry_path)
-
-    content = LOCAL_COMMAND_TEMPLATE % {
+    content = LOCAL_COMMAND_TEMPLATE_POSIX % {
         "project_dir": str(project_dir),
         "local_filename": target.name,
         "command_name": command_name,
-        "script_path": script_path,
+        "script_path": str(entry_path),
     }
 
     target.write_text(
@@ -70,10 +69,10 @@ def install_local_command_windows(
     )
     print()
     print(
-        "Load it in your current PowerShell session with:"
+        "Load it in your current shell session with:"
     )
     print(
-        f"    . .\\{target.name}"
+        f"    source ./{target.name}"
     )
     print()
     print("Usage (only works inside this project's folder):")
@@ -99,49 +98,42 @@ def install_local_command_windows(
     print(
         f"\nValid only in: {project_dir}"
     )
+    print()
+    print(POSIX_SUPPORT_WARNING)
 
 
-def install_global_command_windows(
+def install_global_command_posix(
     command_name: str,
     entry_path: Path,
 ) -> None:
 
-    profile_path = resolve_powershell_profile()
+    rc_path = resolve_shell_rc_file()
 
-    if profile_path is None:
-        print(
-            "[ERROR] Could not resolve the PowerShell "
-            "$PROFILE path."
-        )
-        return
-
-    profile_path.parent.mkdir(
+    rc_path.parent.mkdir(
         parents=True,
         exist_ok=True,
     )
 
-    if profile_path.exists():
+    if rc_path.exists():
         backup_file(
-            profile_path,
-            prefix=profile_path.stem,
+            rc_path,
+            prefix=rc_path.stem,
         )
-        existing = profile_path.read_text(
+        existing = rc_path.read_text(
             encoding="utf-8",
             errors="replace",
         )
     else:
         existing = ""
 
-    script_path = str(entry_path)
-
-    block = GLOBAL_COMMAND_TEMPLATE % (
+    block = GLOBAL_COMMAND_TEMPLATE_POSIX % (
         command_name,
-        script_path,
+        str(entry_path),
     )
 
     updated = upsert_marked_block(existing, block)
 
-    profile_path.write_text(
+    rc_path.write_text(
         updated,
         encoding="utf-8",
     )
@@ -150,14 +142,14 @@ def install_global_command_windows(
         f"[OK] Global command '{command_name}' installed in:"
     )
     print(
-        f"     {profile_path}"
+        f"     {rc_path}"
     )
     print()
     print(
-        "Reload your PowerShell session to use it now:"
+        "Reload your shell session to use it now:"
     )
     print(
-        "    . $PROFILE"
+        f"    source {rc_path}"
     )
     print(
         "(or just open a new terminal window)"
@@ -187,3 +179,5 @@ def install_global_command_windows(
         "\nRuns against the directory you are currently in, "
         "not the thero.py folder."
     )
+    print()
+    print(POSIX_SUPPORT_WARNING)

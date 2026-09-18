@@ -9,8 +9,8 @@ from thero.claude_md.merger import merge_claude_md
 from thero.integrations.athena_bridge import run_athena_index
 from thero.reporting.summary import print_summary
 from thero.settings import CLAUDE_DIR, DEFAULT_COMMAND_NAME, GLOBAL_CLAUDE_MD
+from thero.shell_command import install_global_command
 from thero.shell_command.naming import prompt_command_name
-from thero.shell_command.windows import install_global_command
 from thero.skills.installer import check_skills, install_all_skills, update_skills
 from thero.system.environment import ensure_claude_dir, validate_environment
 from thero.system.process import command_exists
@@ -21,7 +21,7 @@ REQUISITOS
     Node.js / npx
     Claude Code instalado e autenticado
     (skills funcionam sem "claude"; merge/audit exigem "claude")
-    Comando global exige Windows PowerShell
+    Comando de atalho: PowerShell (Windows) ou bash/zsh (macOS/Linux)
 
 COMANDOS
     (sem argumentos)   Fluxo completo: instala skills, consolida
@@ -38,6 +38,7 @@ COMANDOS
     --install-command [NOME]
                        Instala/atualiza somente o comando (global
                        ou local, ver --local) no PowerShell
+                       (Windows) ou bash/zsh (macOS/Linux)
                        (padrao: "%s"), sem mexer em skills nem no
                        CLAUDE.md.
     --index            Roda a Athena (indexador de arquitetura,
@@ -90,11 +91,12 @@ FLUXO RECOMENDADO
     8. Só então considere MAINTENANCE; trate IMPROVEMENT como
        opcional.
 
-COMANDO GLOBAL (PowerShell)
+COMANDO GLOBAL (PowerShell, ou bash/zsh no macOS/Linux)
     O fluxo padrao (sem flags) e o --audit ja instalam/atualizam
-    a funcao "%s" no seu $PROFILE do PowerShell. Ela roda este
-    script a partir de QUALQUER pasta, usando o diretorio atual
-    (nao a pasta deste script):
+    a funcao "%s" no seu $PROFILE (Windows) ou em ~/.zshrc /
+    ~/.bashrc / ~/.profile (macOS/Linux, detectado via $SHELL).
+    Ela roda este script a partir de QUALQUER pasta, usando o
+    diretorio atual (nao a pasta deste script):
         %s              -> instala tudo (skills + CLAUDE.md +
                             comando global)
         %s skills       -> --skills-only
@@ -108,17 +110,20 @@ COMANDO GLOBAL (PowerShell)
     Qualquer outro argumento (ex.: "%s -h") e repassado cru para
     o script. Rodar a instalacao de novo so atualiza a funcao
     existente (nao duplica); requer reiniciar o terminal ou
-    ". $PROFILE" para valer na sessao atual.
+    ". $PROFILE" (Windows) / "source ~/.zshrc" etc. (macOS/Linux)
+    para valer na sessao atual. Suporte macOS/Linux e novo: validado
+    via Git Bash no Windows, zsh/bash reais ainda nao testados.
 
 COMANDO LOCAL (--install-command --local)
-    Em vez de mexer no $PROFILE global, cria "<nome>.local.ps1"
-    na pasta do projeto atual. Carregue na sessao com:
-        . .\<nome>.local.ps1
+    Em vez de mexer no perfil global, cria "<nome>.local.ps1"
+    (Windows) ou "<nome>.local.sh" (macOS/Linux) na pasta do
+    projeto atual. Carregue na sessao com:
+        . .\<nome>.local.ps1        (PowerShell)
+        source ./<nome>.local.sh    (bash/zsh)
     A funcao so executa se o diretorio atual for aquele projeto
     (ou uma subpasta dele); fora dali, recusa com erro. Cada
     chamada ja inclui "--local" ao rodar o script (skills e
-    CLAUDE.md tambem ficam locais ao projeto). So funciona no
-    Windows por enquanto (macOS/Linux: planejado).
+    CLAUDE.md tambem ficam locais ao projeto).
 
 ATHENA (--index)
     A Athena (github.com/netovieira/athena) indexa a arquitetura do
@@ -176,9 +181,8 @@ TROUBLESHOOTING
     Backups ficam ao lado do arquivo original, com sufixo
     ".backup_<AAAAMMDD_HHMMSS>".
     [ERROR] Could not resolve the PowerShell $PROFILE path
-        Comando global so suporta Windows PowerShell; rode o
-        script em um PowerShell normal (nao dentro de outro
-        shell ou ambiente restrito).
+        So ocorre no Windows; rode o script em um PowerShell
+        normal (nao dentro de outro shell ou ambiente restrito).
     Nome do comando global pedido interativamente?
         Isso so acontece em terminal interativo (TTY). Em modo
         nao interativo (ex.: automacao/CI) o nome sugerido
@@ -243,8 +247,9 @@ def parse_args() -> argparse.Namespace:
         default=None,
         metavar="NAME",
         help=(
-            "Install/update only the PowerShell command that "
-            "runs this script, e.g. "
+            "Install/update only the shortcut command (PowerShell "
+            "function on Windows, shell function on macOS/Linux) "
+            "that runs this script, e.g. "
             f"'{DEFAULT_COMMAND_NAME} audit'. Does not "
             "install skills or touch CLAUDE.md. If NAME is "
             "omitted, prompts interactively for a name "
