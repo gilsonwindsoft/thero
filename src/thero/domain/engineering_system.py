@@ -425,9 +425,15 @@ This is a starting point, not a substitute for the real file. Read
 the actual file when a task needs exact signatures, exact logic, or
 the summary does not cover what is needed.
 
-If `.claude/zeus-plan.md` exists (Zeus: a planned tool, not always
-available), treat it as a candidate list of relevant files for the
-current task, not as a substitute for verifying them yourself.
+If `.claude/zeus-plan.md` exists (github.com/netovieira/zeus, an
+optional planner that cross-references a task description with the
+Athena index via `claude -p`), it has four fixed sections in this
+order: `## Objetivo` (restated goal), `## Arquivos selecionados`
+(candidate files with a one-line reason each), `## Passo a passo`
+(numbered steps), `## Riscos` (risks/hidden dependencies to verify).
+Treat the whole file as a candidate starting point for the current
+task, not as ground truth — verify the selected files and steps
+yourself before acting on them.
 
 Do not treat the absence of an Athena index as a problem. Most
 projects will not have one; fall back to normal exploration.

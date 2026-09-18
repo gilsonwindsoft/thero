@@ -234,11 +234,14 @@ fluxo de trabalho, não só como instalação:
   contexto em vez de reler cada arquivo do zero (cai de volta pro
   arquivo real quando o resumo não é suficiente).
 
-**Zeus** — um planejador que cruzaria o pedido do usuário com o índice
-da Athena para decidir exatamente quais arquivos importam para uma
-tarefa — está planejado, mas **ainda não foi implementado**. O
-`CLAUDE.md` gerado já reconhece um `.claude/zeus-plan.md` opcional
-como ponto de partida, para quando o Zeus existir.
+[**Zeus**](https://github.com/netovieira/zeus) — um planejador que
+cruza o pedido do usuário com o índice da Athena (via `claude -p`)
+para decidir quais arquivos importam para uma tarefa — roda separado
+do `thero` (`python zeus.py plan "<tarefa>" [pasta]`). O `CLAUDE.md`
+gerado pelo `thero` já reconhece o `.claude/zeus-plan.md` que ele
+escreve como ponto de partida de contexto (formato: seções fixas
+Objetivo / Arquivos selecionados / Passo a passo / Riscos) — não é
+obrigatório rodar o Zeus para usar o `thero`.
 
 ## Skills
 
@@ -335,8 +338,6 @@ e crescimento sem acoplar regras de negócio diferentes no mesmo arquivo.
 
 ## Known issues
 
-- **Zeus** (planejador que cruzaria o pedido do usuário com o índice
-  da Athena) ainda não foi implementado — apenas planejado.
 - Comando de atalho (`--install-command`) no macOS/Linux é novo:
   validado via Git Bash no Windows (`bash -n` e execução real da
   função gerada), mas zsh/bash reais em macOS/Linux ainda não foram

@@ -138,8 +138,10 @@ ATHENA (--index)
     de IA), pula o clone/update automatico em vez de travar esperando
     confirmacao. O CLAUDE.md gerado pelo thero ja instrui o Claude a
     consultar esse indice quando existir, em vez de reler cada
-    arquivo do zero. Zeus (planejador que cruza o pedido do usuario
-    com o indice da Athena) ainda nao foi implementado.
+    arquivo do zero. Zeus (github.com/netovieira/zeus) roda separado
+    do thero ("python zeus.py plan '<tarefa>' [pasta]") e cruza o
+    pedido do usuario com o indice da Athena via "claude -p", escrevendo
+    um plano candidato em .claude/zeus-plan.md.
 
 SKILLS
     Skills sao instaladas individualmente a partir de repositorios
