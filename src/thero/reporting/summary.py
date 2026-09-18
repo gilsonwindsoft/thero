@@ -53,9 +53,9 @@ QUALITY
   - E2E
   - code review
 
-EXISTING
-  - Caveman preserved
-  - Impeccable preserved
+EXTRA
+  - Caveman (auto-installed)
+  - Impeccable (auto-installed)
 
 TOKEN STRATEGY
   - keep CLAUDE.md small

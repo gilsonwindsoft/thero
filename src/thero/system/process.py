@@ -48,12 +48,16 @@ input_text: str | None = None,
         executable = windows_launchers.get(executable, executable)
         command = [executable, *command[1:]]
 
+    # Sem "encoding" explícito, o Windows decodifica stdout/stderr
+    # usando a codepage do console (ex.: cp1252), corrompendo
+    # acentos que o Claude retorna em UTF-8.
     return subprocess.run(
         command,
         cwd=str(cwd) if cwd else None,
         check=check,
         capture_output=capture,
         text=text,
+        encoding="utf-8" if text else None,
         input=input_text,
         shell=False,
     )

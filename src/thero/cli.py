@@ -10,7 +10,7 @@ from thero.reporting.summary import print_summary
 from thero.settings import CLAUDE_DIR, DEFAULT_COMMAND_NAME, GLOBAL_CLAUDE_MD
 from thero.shell_command.naming import prompt_command_name
 from thero.shell_command.windows import install_global_command
-from thero.skills.installer import install_all_skills
+from thero.skills.installer import check_skills, install_all_skills, update_skills
 from thero.system.environment import ensure_claude_dir, validate_environment
 from thero.system.process import command_exists
 
@@ -39,6 +39,14 @@ COMANDOS
                        ou local, ver --local) no PowerShell
                        (padrao: "%s"), sem mexer em skills nem no
                        CLAUDE.md.
+    --check            Verifica se alguma skill instalada tem
+                       atualizacao disponivel ("npx skills check").
+                       Nao instala nem muda nada. Nao cobre
+                       "impeccable".
+    --update           Atualiza as skills instaladas para a
+                       versao mais recente ("npx skills update").
+                       Nao mexe no CLAUDE.md nem no comando. Nao
+                       cobre "impeccable".
     --local            Opera na pasta do projeto atual em vez do
                        usuario global: CLAUDE.md vira ./CLAUDE.md
                        (nao ~/.claude/CLAUDE.md), skills instalam
@@ -60,6 +68,8 @@ EXEMPLOS
     python thero.py --audit
     python thero.py --install-command
     python thero.py --install-command meunome
+    python thero.py --check
+    python thero.py --update
     python thero.py --help
 
 FLUXO RECOMENDADO
@@ -86,6 +96,8 @@ COMANDO GLOBAL (PowerShell)
         %s merge        -> --merge-only
         %s audit        -> --audit
         %s audit-only   -> --audit-only
+        %s check        -> --check
+        %s update       -> --update
         %s help         -> --help
     Qualquer outro argumento (ex.: "%s -h") e repassado cru para
     o script. Rodar a instalacao de novo so atualiza a funcao
@@ -103,16 +115,17 @@ COMANDO LOCAL (--install-command --local)
     Windows por enquanto (macOS/Linux: planejado).
 
 SKILLS
-    Skills existentes preservadas (nunca removidas): caveman,
-    impeccable.
-    Demais skills sao instaladas individualmente a partir de
-    repositorios externos (Engineering/Reasoning, Supabase,
-    React/Frontend, Agents Inc); a falha em uma skill nao
-    interrompe as demais. Ao final, skills que falharam sao
-    listadas em SKILLS_INSTALL_FAILED.md (mesma pasta deste
-    script; com --local, na pasta do projeto) para envio ao
-    Claude. Sem --local instala em ~/.claude/skills; com --local,
-    em ./.claude/skills do projeto.
+    Skills sao instaladas individualmente a partir de repositorios
+    externos (Engineering/Reasoning, Supabase, React/Frontend,
+    Agents Inc, Caveman); a falha em uma skill nao interrompe as
+    demais. "impeccable" usa seu proprio instalador
+    ("npx impeccable install"), fora do CLI generico de skills. Ao
+    final, o que falhou fica listado em SKILLS_INSTALL_FAILED.md
+    (mesma pasta deste script; com --local, na pasta do projeto)
+    para envio ao Claude. Sem --local instala em ~/.claude/skills;
+    com --local, em ./.claude/skills do projeto. Use --check para
+    ver se ha atualizacoes e --update para aplica-las (nao cobre
+    "impeccable").
 
 CLAUDE.md
     O CLAUDE.md alvo (~/.claude/CLAUDE.md, ou ./CLAUDE.md com
@@ -153,7 +166,7 @@ Documentacao completa: README.md (mesma pasta deste script).
 """
 
 HELP_EPILOG = _HELP_EPILOG_TEMPLATE % (
-    (DEFAULT_COMMAND_NAME,) * 12
+    (DEFAULT_COMMAND_NAME,) * 14
 )
 
 
@@ -237,6 +250,26 @@ def parse_args() -> argparse.Namespace:
         ),
     )
 
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help=(
+            "Check whether any installed skill has an update "
+            "available (runs 'npx skills check'). Does not install "
+            "or change anything. Does not cover 'impeccable'."
+        ),
+    )
+
+    parser.add_argument(
+        "--update",
+        action="store_true",
+        help=(
+            "Update installed skills to their latest version "
+            "(runs 'npx skills update'). Does not touch CLAUDE.md "
+            "or the shortcut command. Does not cover 'impeccable'."
+        ),
+    )
+
     return parser.parse_args()
 
 
@@ -267,6 +300,30 @@ def main(entry_path: Path) -> None:
         claude_dir = CLAUDE_DIR
         claude_md_path = GLOBAL_CLAUDE_MD
         global_install = True
+
+    # --------------------------------------------------------
+    # Check / update skills
+    # --------------------------------------------------------
+
+    if args.check:
+
+        if not validate_environment(require_claude=False):
+            sys.exit(1)
+
+        if not check_skills(global_install):
+            sys.exit(1)
+
+        return
+
+    if args.update:
+
+        if not validate_environment(require_claude=False):
+            sys.exit(1)
+
+        if not update_skills(global_install):
+            sys.exit(1)
+
+        return
 
     # --------------------------------------------------------
     # Install command (global or local)

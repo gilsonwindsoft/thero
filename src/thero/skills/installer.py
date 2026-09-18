@@ -4,7 +4,7 @@ import datetime
 from pathlib import Path
 
 from thero.settings import SKILLS_FAILED_FILENAME
-from thero.skills.catalog import EXISTING_SKILLS, SKILL_REPOSITORIES
+from thero.skills.catalog import SKILL_REPOSITORIES
 from thero.system.process import run_command
 
 
@@ -102,11 +102,19 @@ def install_repository_skills(
         ):
             successful += 1
         else:
+            command = " ".join(
+                build_skill_install_command(
+                    repo,
+                    skill,
+                    global_install,
+                )
+            )
             failed_skills.append(
                 {
                     "group": repository["name"],
                     "repo": repo,
                     "skill": skill,
+                    "command": command,
                 }
             )
 
@@ -120,27 +128,50 @@ def install_repository_skills(
     return failed_skills
 
 
-def install_existing_skill_notice() -> None:
+def install_impeccable() -> dict | None:
+    """
+    "impeccable" não usa o CLI genérico "npx skills add" — tem o
+    próprio instalador ("npx impeccable install"). Instalar de novo
+    é seguro mesmo se já estiver instalada (o próprio pacote decide
+    o que fazer); não tentamos detectar presença antes.
+
+    Retorna um dict de falha (mesmo formato usado por
+    write_failed_skills_report) em caso de erro, ou None se ok.
+    """
 
     print()
     print("=" * 70)
-    print("Existing skills")
+    print("Skill: impeccable")
     print("=" * 70)
 
-    for skill in EXISTING_SKILLS:
+    command = ["npx", "impeccable", "install"]
+
+    result = run_command(
+        command,
+        capture=False,
+    )
+
+    if result.returncode == 0:
         print(
-            f"[KEEP] {skill}"
+            "[OK] Installed impeccable"
         )
+        return None
 
     print(
-        "\nExisting skills are intentionally preserved."
+        "[WARN] Could not install impeccable"
     )
+
+    return {
+        "group": "Impeccable",
+        "repo": "(npm package: impeccable)",
+        "skill": "impeccable",
+        "command": " ".join(command),
+    }
 
 
 def write_failed_skills_report(
     failed_skills: list[dict],
     report_dir: Path,
-    global_install: bool = True,
 ) -> None:
 
     report_path = report_dir / SKILLS_FAILED_FILENAME
@@ -171,20 +202,12 @@ def write_failed_skills_report(
 
     for item in failed_skills:
 
-        command = " ".join(
-            build_skill_install_command(
-                item["repo"],
-                item["skill"],
-                global_install,
-            )
-        )
-
         lines.append(
             f"- [{item['group']}] repo={item['repo']} "
             f"skill={item['skill']}"
         )
         lines.append(
-            f"  comando: {command}"
+            f"  comando: {item['command']}"
         )
 
     report_path.write_text(
@@ -208,8 +231,6 @@ def install_all_skills(
     global_install: bool = True,
 ) -> None:
 
-    install_existing_skill_notice()
-
     failed_skills: list[dict] = []
 
     for repository in SKILL_REPOSITORIES:
@@ -220,10 +241,82 @@ def install_all_skills(
             )
         )
 
+    impeccable_failure = install_impeccable()
+
+    if impeccable_failure is not None:
+        failed_skills.append(impeccable_failure)
+
     report_dir = entry_path.parent if global_install else Path.cwd()
 
     write_failed_skills_report(
         failed_skills,
         report_dir,
-        global_install,
     )
+
+
+def build_skills_check_command(
+    global_install: bool = True,
+) -> list[str]:
+
+    command = ["npx", "skills", "check"]
+
+    if global_install:
+        command.append("--global")
+
+    return command
+
+
+def build_skills_update_command(
+    global_install: bool = True,
+) -> list[str]:
+
+    command = ["npx", "skills", "update"]
+
+    if global_install:
+        command.append("--global")
+
+    return command
+
+
+def check_skills(
+    global_install: bool = True,
+) -> bool:
+    """
+    Verifica se ha skills instaladas (via "npx skills add") com
+    atualizacao disponivel. Nao cobre "impeccable", que nao usa o
+    CLI generico de skills.
+    """
+
+    print()
+    print("=" * 70)
+    print("Checking for skill updates")
+    print("=" * 70)
+
+    result = run_command(
+        build_skills_check_command(global_install),
+        capture=False,
+    )
+
+    return result.returncode == 0
+
+
+def update_skills(
+    global_install: bool = True,
+) -> bool:
+    """
+    Atualiza as skills instaladas (via "npx skills add") para a
+    versao mais recente. Nao cobre "impeccable"; rode
+    "npx impeccable install" de novo manualmente para isso.
+    """
+
+    print()
+    print("=" * 70)
+    print("Updating skills")
+    print("=" * 70)
+
+    result = run_command(
+        build_skills_update_command(global_install),
+        capture=False,
+    )
+
+    return result.returncode == 0

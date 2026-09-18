@@ -68,18 +68,11 @@ SKILL_REPOSITORIES = [
             "accessibility",
         ],
     },
-]
-
-
-# ------------------------------------------------------------
-# Skills que o usuário já utiliza.
-#
-# NÃO removemos nem substituímos.
-#
-# O skills CLI normalmente mantém skills existentes.
-# ------------------------------------------------------------
-
-EXISTING_SKILLS = [
-    "caveman",
-    "impeccable",
+    {
+        "name": "Caveman",
+        "repo": "JuliusBrussee/caveman",
+        "wanted": [
+            "caveman",
+        ],
+    },
 ]
