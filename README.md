@@ -64,7 +64,7 @@ python thero.py [opções]
 | `--audit-only`               | Audita o projeto atual (somente leitura), sem instalar nada.       |
 | `--audit`                    | Executa o fluxo completo e, em seguida, audita o projeto atual.    |
 | `--install-command [NOME]`   | Instala/atualiza somente o comando de atalho (padrão: `thero`). Sem `NOME`, pergunta interativamente (Enter aceita o sugerido). |
-| `--index`                    | Roda a [Athena](https://github.com/netovieira/athena) na pasta atual, se estiver instalada (indexa a arquitetura em `.athena/`). |
+| `--index`                    | Roda a [Athena](https://github.com/netovieira/athena) na pasta atual (indexa a arquitetura em `.athena/`); instala/atualiza automaticamente via git se preciso e o terminal for interativo. |
 | `--check`                    | Verifica se alguma skill instalada tem atualização disponível (`npx skills check` + `npx impeccable check`). |
 | `--update`                   | Atualiza as skills instaladas para a versão mais recente (`npx skills update` + `npx impeccable update`). |
 | `--local`                    | Faz tudo (`CLAUDE.md`, skills, comando) mirar a pasta do projeto atual em vez do usuário global. Combina com qualquer outra flag. |
@@ -213,9 +213,15 @@ O `thero` pode se integrar com a [Athena](https://github.com/netovieira/athena)
 fluxo de trabalho, não só como instalação:
 
 - `thero --index` (ou `thero index`) roda `athena index .` na pasta
-  atual, se a Athena estiver instalada. Ele a procura numa pasta irmã
-  `athena/` (layout padrão do monorepo `myscripts`) ou no caminho
-  apontado pela variável de ambiente `THERO_ATHENA_PATH`.
+  atual. Ele procura a Athena numa pasta irmã `athena/` (layout padrão
+  do monorepo `myscripts`) ou no caminho apontado pela variável de
+  ambiente `THERO_ATHENA_PATH`; se não achar em nenhum dos dois, e o
+  terminal for interativo, oferece clonar automaticamente
+  (`git clone`) numa cópia gerenciada em `~/.thero/tools/athena` — e,
+  se essa cópia já existir mas estiver desatualizada em relação ao
+  remoto, oferece atualizá-la (`git pull`) antes de rodar. Requer
+  `git` instalado; em sessão não interativa (ex.: agente de IA), pula
+  o clone/update automático em vez de travar esperando confirmação.
 - O `CLAUDE.md` que o `thero` gera/consolida já instrui o Claude a
   checar `.athena/summary.md` e `.athena/tree/**` antes de explorar um
   projeto desconhecido, usando os resumos como primeira fonte de

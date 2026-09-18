@@ -123,13 +123,18 @@ COMANDO LOCAL (--install-command --local)
 ATHENA (--index)
     A Athena (github.com/netovieira/athena) indexa a arquitetura do
     projeto atual em ./.athena, resumindo arquivos e pastas via
-    Claude. "--index" so roda se ela estiver instalada: procura
-    athena.py na pasta irma "athena/" (layout padrao do monorepo
-    myscripts) ou no caminho apontado pela variavel de ambiente
-    THERO_ATHENA_PATH. O CLAUDE.md gerado pelo thero ja instrui o
-    Claude a consultar esse indice quando existir, em vez de reler
-    cada arquivo do zero. Zeus (planejador que cruza o pedido do
-    usuario com o indice da Athena) ainda nao foi implementado.
+    Claude. "--index" procura athena.py na pasta irma "athena/"
+    (layout padrao do monorepo myscripts) ou no caminho apontado pela
+    variavel de ambiente THERO_ATHENA_PATH; se nao achar em nenhum
+    dos dois, e o terminal for interativo, oferece clonar
+    automaticamente (git clone) em ~/.thero/tools/athena, ou
+    atualizar (git pull) se a copia gerenciada ja existir mas estiver
+    desatualizada. Requer git; em sessao nao interativa (ex.: agente
+    de IA), pula o clone/update automatico em vez de travar esperando
+    confirmacao. O CLAUDE.md gerado pelo thero ja instrui o Claude a
+    consultar esse indice quando existir, em vez de reler cada
+    arquivo do zero. Zeus (planejador que cruza o pedido do usuario
+    com o indice da Athena) ainda nao foi implementado.
 
 SKILLS
     Skills sao instaladas individualmente a partir de repositorios
