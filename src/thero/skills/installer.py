@@ -128,12 +128,33 @@ def install_repository_skills(
     return failed_skills
 
 
-def install_impeccable() -> dict | None:
+def build_impeccable_install_command(
+    global_install: bool = True,
+) -> list[str]:
+
+    command = [
+        "npx",
+        "impeccable",
+        "install",
+        "-y",
+        "--force",
+        "--providers=claude",
+    ]
+
+    command.append("--global" if global_install else "--project")
+
+    return command
+
+
+def install_impeccable(
+    global_install: bool = True,
+) -> dict | None:
     """
     "impeccable" não usa o CLI genérico "npx skills add" — tem o
-    próprio instalador ("npx impeccable install"). Instalar de novo
-    é seguro mesmo se já estiver instalada (o próprio pacote decide
-    o que fazer); não tentamos detectar presença antes.
+    próprio instalador ("npx impeccable install"). "-y" evita os
+    prompts interativos (harness/escopo); sem isso, o default do
+    prompt de escopo é "project", que instalaria dentro do diretório
+    atual em vez de ~/.claude.
 
     Retorna um dict de falha (mesmo formato usado por
     write_failed_skills_report) em caso de erro, ou None se ok.
@@ -144,7 +165,7 @@ def install_impeccable() -> dict | None:
     print("Skill: impeccable")
     print("=" * 70)
 
-    command = ["npx", "impeccable", "install"]
+    command = build_impeccable_install_command(global_install)
 
     result = run_command(
         command,
@@ -241,7 +262,7 @@ def install_all_skills(
             )
         )
 
-    impeccable_failure = install_impeccable()
+    impeccable_failure = install_impeccable(global_install)
 
     if impeccable_failure is not None:
         failed_skills.append(impeccable_failure)
@@ -282,9 +303,8 @@ def check_skills(
     global_install: bool = True,
 ) -> bool:
     """
-    Verifica se ha skills instaladas (via "npx skills add") com
-    atualizacao disponivel. Nao cobre "impeccable", que nao usa o
-    CLI generico de skills.
+    Verifica se ha skills instaladas (via "npx skills add" e via
+    "impeccable") com atualizacao disponivel.
     """
 
     print()
@@ -292,21 +312,30 @@ def check_skills(
     print("Checking for skill updates")
     print("=" * 70)
 
-    result = run_command(
+    skills_ok = run_command(
         build_skills_check_command(global_install),
         capture=False,
-    )
+    ).returncode == 0
 
-    return result.returncode == 0
+    print()
+    print("=" * 70)
+    print("Checking impeccable for updates")
+    print("=" * 70)
+
+    impeccable_ok = run_command(
+        ["npx", "impeccable", "check"],
+        capture=False,
+    ).returncode == 0
+
+    return skills_ok and impeccable_ok
 
 
 def update_skills(
     global_install: bool = True,
 ) -> bool:
     """
-    Atualiza as skills instaladas (via "npx skills add") para a
-    versao mais recente. Nao cobre "impeccable"; rode
-    "npx impeccable install" de novo manualmente para isso.
+    Atualiza as skills instaladas (via "npx skills add" e via
+    "impeccable") para a versao mais recente.
     """
 
     print()
@@ -314,9 +343,28 @@ def update_skills(
     print("Updating skills")
     print("=" * 70)
 
-    result = run_command(
+    skills_ok = run_command(
         build_skills_update_command(global_install),
         capture=False,
-    )
+    ).returncode == 0
 
-    return result.returncode == 0
+    print()
+    print("=" * 70)
+    print("Updating impeccable")
+    print("=" * 70)
+
+    impeccable_command = [
+        "npx",
+        "impeccable",
+        "update",
+        "-y",
+        "--force",
+    ]
+    impeccable_command.append("--global" if global_install else "--project")
+
+    impeccable_ok = run_command(
+        impeccable_command,
+        capture=False,
+    ).returncode == 0
+
+    return skills_ok and impeccable_ok

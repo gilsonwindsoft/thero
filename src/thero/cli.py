@@ -44,14 +44,13 @@ COMANDOS
                        github.com/netovieira/athena) na pasta
                        atual, se estiver instalada. Nao instala
                        skills, nem mexe no CLAUDE.md/comando.
-    --check            Verifica se alguma skill instalada tem
-                       atualizacao disponivel ("npx skills check").
-                       Nao instala nem muda nada. Nao cobre
-                       "impeccable".
-    --update           Atualiza as skills instaladas para a
-                       versao mais recente ("npx skills update").
-                       Nao mexe no CLAUDE.md nem no comando. Nao
-                       cobre "impeccable".
+    --check            Verifica se alguma skill instalada (via
+                       "npx skills" e "impeccable") tem atualizacao
+                       disponivel. Nao instala nem muda nada.
+    --update           Atualiza as skills instaladas (via
+                       "npx skills" e "impeccable") para a versao
+                       mais recente. Nao mexe no CLAUDE.md nem no
+                       comando.
     --local            Opera na pasta do projeto atual em vez do
                        usuario global: CLAUDE.md vira ./CLAUDE.md
                        (nao ~/.claude/CLAUDE.md), skills instalam
@@ -142,8 +141,8 @@ SKILLS
     (mesma pasta deste script; com --local, na pasta do projeto)
     para envio ao Claude. Sem --local instala em ~/.claude/skills;
     com --local, em ./.claude/skills do projeto. Use --check para
-    ver se ha atualizacoes e --update para aplica-las (nao cobre
-    "impeccable").
+    ver se ha atualizacoes e --update para aplica-las (cobre tanto
+    o CLI generico de skills quanto "impeccable").
 
 CLAUDE.md
     O CLAUDE.md alvo (~/.claude/CLAUDE.md, ou ./CLAUDE.md com
@@ -285,8 +284,9 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help=(
             "Check whether any installed skill has an update "
-            "available (runs 'npx skills check'). Does not install "
-            "or change anything. Does not cover 'impeccable'."
+            "available (runs 'npx skills check' and "
+            "'npx impeccable check'). Does not install or change "
+            "anything."
         ),
     )
 
@@ -294,9 +294,9 @@ def parse_args() -> argparse.Namespace:
         "--update",
         action="store_true",
         help=(
-            "Update installed skills to their latest version "
-            "(runs 'npx skills update'). Does not touch CLAUDE.md "
-            "or the shortcut command. Does not cover 'impeccable'."
+            "Update installed skills to their latest version (runs "
+            "'npx skills update' and 'npx impeccable update'). Does "
+            "not touch CLAUDE.md or the shortcut command."
         ),
     )
 

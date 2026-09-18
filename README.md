@@ -65,8 +65,8 @@ python thero.py [opções]
 | `--audit`                    | Executa o fluxo completo e, em seguida, audita o projeto atual.    |
 | `--install-command [NOME]`   | Instala/atualiza somente o comando de atalho (padrão: `thero`). Sem `NOME`, pergunta interativamente (Enter aceita o sugerido). |
 | `--index`                    | Roda a [Athena](https://github.com/netovieira/athena) na pasta atual, se estiver instalada (indexa a arquitetura em `.athena/`). |
-| `--check`                    | Verifica se alguma skill instalada tem atualização disponível (`npx skills check`). Não cobre `impeccable`. |
-| `--update`                   | Atualiza as skills instaladas para a versão mais recente (`npx skills update`). Não cobre `impeccable`. |
+| `--check`                    | Verifica se alguma skill instalada tem atualização disponível (`npx skills check` + `npx impeccable check`). |
+| `--update`                   | Atualiza as skills instaladas para a versão mais recente (`npx skills update` + `npx impeccable update`). |
 | `--local`                    | Faz tudo (`CLAUDE.md`, skills, comando) mirar a pasta do projeto atual em vez do usuário global. Combina com qualquer outra flag. |
 | `-h`, `--help`               | Mostra a ajuda e sai, sem instalar nada, sem modificar arquivos e sem chamar o Claude. |
 
@@ -235,9 +235,9 @@ por skill), para que a falta ou renomeação de uma skill não interrompa a
 instalação das demais. Sem `--local`, instalam em `~/.claude/skills`
 (`--global` no `npx skills add`); com `--local`, instalam em
 `./.claude/skills` do projeto (sem `--global`). `impeccable` usa seu
-próprio instalador (`npx impeccable install`), fora desse mecanismo
-genérico. Use `--check`/`--update` para ver e aplicar atualizações das
-skills geridas pelo `npx skills` (não cobre `impeccable`).
+próprio instalador (`npx impeccable install -y --force --providers=claude`,
+sem prompts), fora desse mecanismo genérico. `--check`/`--update`
+cobrem os dois mecanismos (`npx skills` e `impeccable`).
 
 Ao final da instalação, o script gera automaticamente
 `SKILLS_INSTALL_FAILED.md` — na pasta deste script (modo global) ou na

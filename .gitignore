@@ -12,11 +12,12 @@ SKILLS_INSTALL_FAILED.md
 *.backup_*
 .CLAUDE.md.tmp_*
 
-# Hooks locais gerados por instaladores de skill (ex.: impeccable)
-# ao rodar "npx skills add"/"npx impeccable install" com esta pasta
-# como cwd — path absoluto e especifico da maquina, nunca versionar.
+# Artefatos de instaladores de skill (ex.: impeccable) ao rodar com
+# esta pasta como cwd — nunca versionar (path absoluto/especifico da
+# maquina, ou instalacao acidental em escopo "project" deste repo).
 .codex/
 .cursor/
+.claude/
 
 # Editor / OS
 .vscode/
