@@ -41,7 +41,12 @@ jobs:
           cache-dependency-path: landing/package-lock.json
 
       - name: Install dependencies
-        run: npm ci
+        # npm install (not `npm ci`): the Vite/rolldown/@lovable toolchain has a
+        # transitive ajv version conflict that makes the lockfile fail `npm ci`'s
+        # strict tree validation, and a Windows-authored lock omits the Linux
+        # native binding. `npm install` reconciles the tree on the runner and
+        # fetches the correct platform binding. Cache still keys off package-lock.json.
+        run: npm install --no-audit --no-fund --prefer-offline
 
       - name: Build static site (SSG)
         # Emits a fully prerendered, self-contained site to landing/dist/client
