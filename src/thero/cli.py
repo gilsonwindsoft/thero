@@ -7,6 +7,7 @@ from pathlib import Path
 from thero.audit.auditor import audit_project, print_audit_workflow
 from thero.claude_md.merger import merge_claude_md
 from thero.integrations.athena_bridge import run_athena_index
+from thero.integrations.zeus_bridge import run_zeus_plan
 from thero.reporting.summary import print_summary
 from thero.settings import CLAUDE_DIR, DEFAULT_COMMAND_NAME, GLOBAL_CLAUDE_MD
 from thero.shell_command import install_global_command
@@ -74,6 +75,7 @@ EXEMPLOS
     python thero.py --install-command
     python thero.py --install-command meunome
     python thero.py --index
+    python thero.py --plan "adicionar campo de telefone no cadastro de usuario"
     python thero.py --check
     python thero.py --update
     python thero.py --help
@@ -138,10 +140,20 @@ ATHENA (--index)
     de IA), pula o clone/update automatico em vez de travar esperando
     confirmacao. O CLAUDE.md gerado pelo thero ja instrui o Claude a
     consultar esse indice quando existir, em vez de reler cada
-    arquivo do zero. Zeus (github.com/netovieira/zeus) roda separado
-    do thero ("python zeus.py plan '<tarefa>' [pasta]") e cruza o
-    pedido do usuario com o indice da Athena via "claude -p", escrevendo
-    um plano candidato em .claude/zeus-plan.md.
+    arquivo do zero.
+
+ZEUS (--plan TAREFA)
+    O Zeus (github.com/netovieira/zeus) cruza a tarefa descrita com o
+    indice da Athena do projeto atual via "claude -p" e escreve um
+    plano candidato em .claude/zeus-plan.md. "--plan" localiza
+    zeus.py na variavel de ambiente THERO_ZEUS_PATH, na pasta irma
+    "zeus/" (layout do monorepo myscripts), ou instala/atualiza
+    automaticamente em ~/.thero/tools/zeus — exatamente o mesmo
+    mecanismo de "--index" para a Athena, com confirmacao e mesma
+    regra de sessao nao interativa. Nao e um subcomando do atalho
+    global (ex.: "thero plan" nao existe); use
+    'thero --plan "<tarefa>"' diretamente (repassado cru pelo
+    atalho, como qualquer flag nao mapeada).
 
 SKILLS
     Skills sao instaladas individualmente a partir de repositorios
@@ -292,6 +304,21 @@ def parse_args() -> argparse.Namespace:
     )
 
     parser.add_argument(
+        "--plan",
+        metavar="TASK",
+        default=None,
+        help=(
+            "Run Zeus (https://github.com/netovieira/zeus) to plan "
+            "TASK against the current project's Athena index, "
+            "writing .claude/zeus-plan.md. Installs/updates Zeus "
+            "automatically the same way --index does for Athena "
+            "(clone/update via git, with confirmation, if not found "
+            "next to thero). Does not install skills, touch "
+            "CLAUDE.md, or manage the shortcut command."
+        ),
+    )
+
+    parser.add_argument(
         "--check",
         action="store_true",
         help=(
@@ -350,6 +377,17 @@ def main(entry_path: Path) -> None:
     if args.index:
 
         if not run_athena_index(entry_path):
+            sys.exit(1)
+
+        return
+
+    # --------------------------------------------------------
+    # Zeus (planejamento de tarefa)
+    # --------------------------------------------------------
+
+    if args.plan is not None:
+
+        if not run_zeus_plan(entry_path, args.plan):
             sys.exit(1)
 
         return

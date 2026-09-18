@@ -68,6 +68,7 @@ python thero.py [opções]
 | `--audit`                    | Executa o fluxo completo e, em seguida, audita o projeto atual.    |
 | `--install-command [NOME]`   | Instala/atualiza somente o comando de atalho (padrão: `thero`). Sem `NOME`, pergunta interativamente (Enter aceita o sugerido). |
 | `--index`                    | Roda a [Athena](https://github.com/netovieira/athena) na pasta atual (indexa a arquitetura em `.athena/`); instala/atualiza automaticamente via git se preciso e o terminal for interativo. |
+| `--plan TAREFA`              | Roda o [Zeus](https://github.com/netovieira/zeus) na pasta atual para planejar `TAREFA` (escreve `.claude/zeus-plan.md`); instala/atualiza automaticamente via git, mesmo mecanismo do `--index`. |
 | `--check`                    | Verifica se alguma skill instalada tem atualização disponível (`npx skills check` + `npx impeccable check`). |
 | `--update`                   | Atualiza as skills instaladas para a versão mais recente (`npx skills update` + `npx impeccable update`). |
 | `--local`                    | Faz tudo (`CLAUDE.md`, skills, comando) mirar a pasta do projeto atual em vez do usuário global. Combina com qualquer outra flag. |
@@ -236,12 +237,19 @@ fluxo de trabalho, não só como instalação:
 
 [**Zeus**](https://github.com/netovieira/zeus) — um planejador que
 cruza o pedido do usuário com o índice da Athena (via `claude -p`)
-para decidir quais arquivos importam para uma tarefa — roda separado
-do `thero` (`python zeus.py plan "<tarefa>" [pasta]`). O `CLAUDE.md`
-gerado pelo `thero` já reconhece o `.claude/zeus-plan.md` que ele
-escreve como ponto de partida de contexto (formato: seções fixas
-Objetivo / Arquivos selecionados / Passo a passo / Riscos) — não é
-obrigatório rodar o Zeus para usar o `thero`.
+para decidir quais arquivos importam para uma tarefa — pode rodar
+tanto standalone (`python zeus.py plan "<tarefa>" [pasta]`) quanto
+via `thero --plan "<tarefa>"`, na pasta atual. `--plan` localiza o
+Zeus exatamente como `--index` localiza a Athena: variável de
+ambiente `THERO_ZEUS_PATH` → pasta irmã `zeus/` (layout do monorepo
+`myscripts`) → cópia gerenciada em `~/.thero/tools/zeus`, clonada ou
+atualizada automaticamente via `git`, com confirmação, se não achar
+nos dois primeiros lugares. `thero --plan` já roda `athena index`
+sozinho antes de planejar (o Zeus faz isso), então não precisa rodar
+`thero --index` antes. O `CLAUDE.md` gerado pelo `thero` já reconhece
+o `.claude/zeus-plan.md` resultante como ponto de partida de contexto
+(formato: seções fixas Objetivo / Arquivos selecionados / Passo a
+passo / Riscos) — não é obrigatório rodar o Zeus para usar o `thero`.
 
 ## Skills
 
