@@ -25,19 +25,20 @@ SKILL_REPOSITORIES = [
         ],
     },
     {
+        # "react-hooks", "accessibility" e "performance" nao existem
+        # neste repo (confirmado rodando o install real e lendo a
+        # lista de skills que o proprio CLI devolve no erro).
+        # "feature-architecture" foi renomeada para "feature-arch".
         "name": "React / Frontend",
         "repo": "PyModel/react-frontend-skills",
         "wanted": [
             "react",
-            "react-hooks",
             "nextjs",
             "typescript",
             "tailwind",
             "shadcn",
             "ui-design",
-            "accessibility",
-            "performance",
-            "feature-architecture",
+            "feature-arch",
             "vercel-react-best-practices",
             "react-hook-form",
             "zod",
@@ -49,23 +50,24 @@ SKILL_REPOSITORIES = [
         ],
     },
     {
+        # Repo migrou pra nomes prefixados por categoria (confirmado
+        # rodando o install real). "python" e "testing" genericos nao
+        # tem equivalente direto neste repo — removidos.
         "name": "Agents Inc",
         "repo": "agents-inc/skills",
         "wanted": [
-            "typescript",
-            "react",
-            "nextjs",
-            "python",
-            "firebase",
-            "stripe",
-            "supabase",
-            "tailwind",
-            "mui",
-            "testing",
-            "security",
-            "code-review",
-            "performance",
-            "accessibility",
+            "shared-tooling-typescript-config",
+            "web-framework-react",
+            "web-meta-framework-nextjs",
+            "api-baas-firebase",
+            "api-commerce-stripe",
+            "api-baas-supabase",
+            "web-styling-tailwind",
+            "web-ui-mui",
+            "shared-security-auth-security",
+            "meta-reviewing-reviewing",
+            "web-performance-web-performance",
+            "web-accessibility-web-accessibility",
         ],
     },
     {
