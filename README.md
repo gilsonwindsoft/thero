@@ -1,10 +1,46 @@
 # Thero
 
-Configura um ambiente profissional para o [Claude Code](https://claude.com/claude-code):
-instala Agent Skills, consolida o `CLAUDE.md`, audita projetos e cria um
-comando de atalho (`thero`) para tudo isso.
+![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)
+![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)
+![Stdlib only](https://img.shields.io/badge/dependencies-stdlib--only-brightgreen.svg)
 
-## Descrição
+**Configura seu [Claude Code](https://claude.com/claude-code) como se
+um time sênior tivesse revisado antes de você abrir o terminal.**
+
+Você abre o Claude Code num projeto novo e ele começa do zero: não
+conhece suas convenções, não sabe se pode reescrever código que já
+funciona, não avisa antes de uma ação arriscada. Toda sessão você
+reexplica as mesmas regras. O `thero` resolve isso de vez: roda um
+comando, e toda sessão futura do Claude Code — nesse computador ou
+nesse projeto — já nasce sabendo como você trabalha.
+
+Não precisa ser sênior pra usar. Se você está começando a programar e
+quer que o Claude Code te ajude com um padrão de qualidade real (em
+vez de só "fazer funcionar"), é exatamente pra isso que o `thero`
+existe — ele importa, pra dentro do seu projeto, o jeito de trabalhar
+de quem já bateu a cabeça com isso.
+
+## Por que usar
+
+- **Você para de reexplicar o óbvio.** Regras como "não reescreva
+  código que já funciona sem necessidade", "avise antes de ações
+  destrutivas", "termine com um resumo do que mudou" passam a valer
+  desde a primeira mensagem, em qualquer projeto.
+- **Conhecimento especializado sob demanda.** React, Supabase,
+  TypeScript, testes — instalados como Agent Skills, que só entram no
+  contexto quando a tarefa realmente precisa (sem inflar toda
+  conversa com informação irrelevante).
+- **Zero dependências, zero risco.** Só Python (que você já tem se
+  programa) e o próprio Claude Code. Nunca apaga nada seu — sempre
+  faz backup antes de qualquer mudança.
+- **Parte de uma suíte**: o [Athena](https://github.com/netovieira/athena)
+  indexa a arquitetura do seu projeto pra o Claude não precisar reler
+  tudo do zero, e o [Zeus](https://github.com/netovieira/zeus) planeja
+  uma tarefa antes de você pedir pro Claude executar. Os três se
+  integram (veja [Athena e Zeus](#athena-e-zeus) abaixo), mas cada um
+  funciona sozinho.
+
+## O que ele faz
 
 O `thero.py` automatiza a configuração do Claude Code para um fluxo de
 engenharia de software profissional. Ele:
@@ -298,20 +334,12 @@ O script nunca apaga o `CLAUDE.md` existente — `~/.claude/CLAUDE.md` por
 padrão, ou `./CLAUDE.md` (na pasta do projeto) com `--local`. O fluxo de
 consolidação é:
 
-```
-~/.claude/CLAUDE.md  (ou ./CLAUDE.md com --local)
-        |
-        v
-backup com timestamp (CLAUDE.md.backup_<timestamp>.md)
-        |
-        v
-Claude consolida (existente + Engineering Operating System)
-        |
-        v
-validação do resultado (tamanho mínimo, sem markdown fences)
-        |
-        v
-novo CLAUDE.md (substituição atômica via arquivo temporário)
+```mermaid
+flowchart TD
+    A["~/.claude/CLAUDE.md<br/>(ou ./CLAUDE.md com --local)"] --> B["Backup com timestamp<br/>(CLAUDE.md.backup_&lt;timestamp&gt;.md)"]
+    B --> C["Claude consolida<br/>(existente + Engineering Operating System)"]
+    C --> D["Valida o resultado<br/>(tamanho mínimo, sem markdown fences)"]
+    D --> E["Novo CLAUDE.md<br/>(substituição atômica via arquivo temporário)"]
 ```
 
 Se o `CLAUDE.md` alvo ainda não existir, ele é criado diretamente a
@@ -329,23 +357,19 @@ de arquivo que o Claude Code já sabe ler sozinho: `CLAUDE.md`
 `thero` termina, mas o efeito só aparece na **próxima sessão** do
 Claude Code (por isso ele sempre lembra "reinicie o Claude Code").
 
-```
-thero (roda uma vez)
-        |
-        v
-~/.claude/CLAUDE.md escrito      ~/.claude/skills/<nome>/ copiadas
-(Engineering Operating System)    (Supabase, React, Caveman, ...)
-        |                                    |
-        +-------------------+----------------+
-                            |
-                            v
-        você reinicia o Claude Code / abre um terminal novo
-                            |
-                            v
-        toda sessão nova carrega os dois automaticamente
-                            |
-                            v
-        Claude já responde seguindo as regras, sem você pedir
+```mermaid
+flowchart TD
+    A["Você pergunta algo pro Claude Code"] --> B{"Sessão nova?"}
+    B -- "Sim" --> C["Carrega ~/.claude/CLAUDE.md<br/>+ lista de skills instaladas"]
+    B -- "Não, já carregado antes" --> D
+    C --> D["Aplica as regras do CLAUDE.md<br/>(fidelidade ao pedido, diff mínimo,<br/>segurança, formato de resposta...)"]
+    D --> E{"O pedido é sobre algo coberto<br/>por uma skill instalada?<br/>(React, Supabase, testes...)"}
+    E -- "Sim" --> F["Ativa essa skill no contexto"]
+    E -- "Não" --> G
+    F --> G{"O projeto tem .athena/<br/>ou .claude/zeus-plan.md?"}
+    G -- "Sim" --> H["Consulta os resumos/plano<br/>antes de abrir arquivo por arquivo"]
+    G -- "Não" --> I
+    H --> I["Claude responde já seguindo<br/>as regras + o contexto do projeto"]
 ```
 
 Na prática, isso significa que **antes mesmo de você digitar
@@ -492,7 +516,6 @@ Node.js ou Claude Code configurados.
 **Anthero Vieira Neto**
 
 - E-mail: antherovn@gmail.com
-- WhatsApp Business: +55 17 9210-1133
 - LinkedIn: https://www.linkedin.com/in/anthero-vieira-neto-aa7a6b8a
 - GitHub: http://github.com/netovieira
 
