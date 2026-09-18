@@ -6,6 +6,7 @@ from pathlib import Path
 
 from thero.audit.auditor import audit_project, print_audit_workflow
 from thero.claude_md.merger import merge_claude_md
+from thero.integrations.athena_bridge import run_athena_index
 from thero.reporting.summary import print_summary
 from thero.settings import CLAUDE_DIR, DEFAULT_COMMAND_NAME, GLOBAL_CLAUDE_MD
 from thero.shell_command.naming import prompt_command_name
@@ -39,6 +40,10 @@ COMANDOS
                        ou local, ver --local) no PowerShell
                        (padrao: "%s"), sem mexer em skills nem no
                        CLAUDE.md.
+    --index            Roda a Athena (indexador de arquitetura,
+                       github.com/netovieira/athena) na pasta
+                       atual, se estiver instalada. Nao instala
+                       skills, nem mexe no CLAUDE.md/comando.
     --check            Verifica se alguma skill instalada tem
                        atualizacao disponivel ("npx skills check").
                        Nao instala nem muda nada. Nao cobre
@@ -68,6 +73,7 @@ EXEMPLOS
     python thero.py --audit
     python thero.py --install-command
     python thero.py --install-command meunome
+    python thero.py --index
     python thero.py --check
     python thero.py --update
     python thero.py --help
@@ -96,6 +102,7 @@ COMANDO GLOBAL (PowerShell)
         %s merge        -> --merge-only
         %s audit        -> --audit
         %s audit-only   -> --audit-only
+        %s index        -> --index
         %s check        -> --check
         %s update       -> --update
         %s help         -> --help
@@ -113,6 +120,17 @@ COMANDO LOCAL (--install-command --local)
     chamada ja inclui "--local" ao rodar o script (skills e
     CLAUDE.md tambem ficam locais ao projeto). So funciona no
     Windows por enquanto (macOS/Linux: planejado).
+
+ATHENA (--index)
+    A Athena (github.com/netovieira/athena) indexa a arquitetura do
+    projeto atual em ./.athena, resumindo arquivos e pastas via
+    Claude. "--index" so roda se ela estiver instalada: procura
+    athena.py na pasta irma "athena/" (layout padrao do monorepo
+    myscripts) ou no caminho apontado pela variavel de ambiente
+    THERO_ATHENA_PATH. O CLAUDE.md gerado pelo thero ja instrui o
+    Claude a consultar esse indice quando existir, em vez de reler
+    cada arquivo do zero. Zeus (planejador que cruza o pedido do
+    usuario com o indice da Athena) ainda nao foi implementado.
 
 SKILLS
     Skills sao instaladas individualmente a partir de repositorios
@@ -166,7 +184,7 @@ Documentacao completa: README.md (mesma pasta deste script).
 """
 
 HELP_EPILOG = _HELP_EPILOG_TEMPLATE % (
-    (DEFAULT_COMMAND_NAME,) * 14
+    (DEFAULT_COMMAND_NAME,) * 15
 )
 
 
@@ -251,6 +269,18 @@ def parse_args() -> argparse.Namespace:
     )
 
     parser.add_argument(
+        "--index",
+        action="store_true",
+        help=(
+            "Run Athena (https://github.com/netovieira/athena) to "
+            "index the current project's architecture into "
+            "./.athena, if Athena is installed. Does not install "
+            "skills, touch CLAUDE.md, or manage the shortcut "
+            "command."
+        ),
+    )
+
+    parser.add_argument(
         "--check",
         action="store_true",
         help=(
@@ -300,6 +330,17 @@ def main(entry_path: Path) -> None:
         claude_dir = CLAUDE_DIR
         claude_md_path = GLOBAL_CLAUDE_MD
         global_install = True
+
+    # --------------------------------------------------------
+    # Athena (indexação de arquitetura)
+    # --------------------------------------------------------
+
+    if args.index:
+
+        if not run_athena_index(entry_path):
+            sys.exit(1)
+
+        return
 
     # --------------------------------------------------------
     # Check / update skills

@@ -20,6 +20,9 @@ function %s {
         'merge'      = @('--merge-only')
         'audit'      = @('--audit')
         'audit-only' = @('--audit-only')
+        'index'      = @('--index')
+        'check'      = @('--check')
+        'update'     = @('--update')
         'help'       = @('--help')
     }
 
@@ -77,6 +80,9 @@ function %(command_name)s {
         'merge'      = @('--merge-only')
         'audit'      = @('--audit')
         'audit-only' = @('--audit-only')
+        'index'      = @('--index')
+        'check'      = @('--check')
+        'update'     = @('--update')
         'help'       = @('--help')
     }
 

@@ -64,6 +64,9 @@ python thero.py [opções]
 | `--audit-only`               | Audita o projeto atual (somente leitura), sem instalar nada.       |
 | `--audit`                    | Executa o fluxo completo e, em seguida, audita o projeto atual.    |
 | `--install-command [NOME]`   | Instala/atualiza somente o comando de atalho (padrão: `thero`). Sem `NOME`, pergunta interativamente (Enter aceita o sugerido). |
+| `--index`                    | Roda a [Athena](https://github.com/netovieira/athena) na pasta atual, se estiver instalada (indexa a arquitetura em `.athena/`). |
+| `--check`                    | Verifica se alguma skill instalada tem atualização disponível (`npx skills check`). Não cobre `impeccable`. |
+| `--update`                   | Atualiza as skills instaladas para a versão mais recente (`npx skills update`). Não cobre `impeccable`. |
 | `--local`                    | Faz tudo (`CLAUDE.md`, skills, comando) mirar a pasta do projeto atual em vez do usuário global. Combina com qualquer outra flag. |
 | `-h`, `--help`               | Mostra a ajuda e sai, sem instalar nada, sem modificar arquivos e sem chamar o Claude. |
 
@@ -125,6 +128,19 @@ no `$PROFILE` global):
 python thero.py --install-command --local
 ```
 
+Indexar a arquitetura do projeto atual com a Athena (se instalada):
+
+```
+python thero.py --index
+```
+
+Ver se alguma skill tem atualização, e atualizar:
+
+```
+python thero.py --check
+python thero.py --update
+```
+
 Ver a ajuda (não instala nada, não modifica nada, não chama o Claude):
 
 ```
@@ -173,6 +189,9 @@ thero skills       -> --skills-only
 thero merge        -> --merge-only
 thero audit        -> --audit
 thero audit-only   -> --audit-only
+thero index        -> --index
+thero check        -> --check
+thero update       -> --update
 thero help         -> --help
 thero -h           -> repassado cru (qualquer flag não mapeada)
 ```
@@ -187,13 +206,38 @@ locais ao projeto).
 Rodar a instalação de novo (global ou local) atualiza a função existente
 — não duplica, mesmo trocando de nome.
 
+## Athena e Zeus
+
+O `thero` pode se integrar com a [Athena](https://github.com/netovieira/athena)
+(indexador recursivo de arquitetura via Claude Code) como parte do
+fluxo de trabalho, não só como instalação:
+
+- `thero --index` (ou `thero index`) roda `athena index .` na pasta
+  atual, se a Athena estiver instalada. Ele a procura numa pasta irmã
+  `athena/` (layout padrão do monorepo `myscripts`) ou no caminho
+  apontado pela variável de ambiente `THERO_ATHENA_PATH`.
+- O `CLAUDE.md` que o `thero` gera/consolida já instrui o Claude a
+  checar `.athena/summary.md` e `.athena/tree/**` antes de explorar um
+  projeto desconhecido, usando os resumos como primeira fonte de
+  contexto em vez de reler cada arquivo do zero (cai de volta pro
+  arquivo real quando o resumo não é suficiente).
+
+**Zeus** — um planejador que cruzaria o pedido do usuário com o índice
+da Athena para decidir exatamente quais arquivos importam para uma
+tarefa — está planejado, mas **ainda não foi implementado**. O
+`CLAUDE.md` gerado já reconhece um `.claude/zeus-plan.md` opcional
+como ponto de partida, para quando o Zeus existir.
+
 ## Skills
 
 As skills são instaladas individualmente (uma chamada `npx skills add`
 por skill), para que a falta ou renomeação de uma skill não interrompa a
 instalação das demais. Sem `--local`, instalam em `~/.claude/skills`
 (`--global` no `npx skills add`); com `--local`, instalam em
-`./.claude/skills` do projeto (sem `--global`).
+`./.claude/skills` do projeto (sem `--global`). `impeccable` usa seu
+próprio instalador (`npx impeccable install`), fora desse mecanismo
+genérico. Use `--check`/`--update` para ver e aplicar atualizações das
+skills geridas pelo `npx skills` (não cobre `impeccable`).
 
 Ao final da instalação, o script gera automaticamente
 `SKILLS_INSTALL_FAILED.md` — na pasta deste script (modo global) ou na
@@ -202,11 +246,6 @@ pasta do projeto (modo `--local`) — listando cada skill que falhou
 instalar com sucesso, esse arquivo é removido/não é criado. Envie o
 conteúdo desse arquivo para o Claude corrigir os nomes de skills ou
 repositórios desatualizados.
-
-Skills já existentes que **não** são removidas nem substituídas:
-
-- `caveman`
-- `impeccable`
 
 Grupos de skills instalados a partir de repositórios externos:
 
@@ -224,6 +263,11 @@ Grupos de skills instalados a partir de repositórios externos:
   `typescript`, `react`, `nextjs`, `python`, `firebase`, `stripe`,
   `supabase`, `tailwind`, `mui`, `testing`, `security`,
   `code-review`, `performance`, `accessibility`
+- **Caveman** (`JuliusBrussee/caveman`): `caveman`
+
+Instalada à parte (não usa `npx skills add`):
+
+- **impeccable** — `npx impeccable install`
 
 ## CLAUDE.md
 
@@ -267,7 +311,8 @@ thero/
 │   ├── claude_md/               # cliente `claude -p` + merge do CLAUDE.md
 │   ├── audit/                    # auditoria de projeto (read-only)
 │   ├── shell_command/             # comando de atalho (PowerShell global/local)
-│   └── system/                     # processo, backup, ambiente
+│   ├── integrations/               # ponte com ferramentas externas (Athena)
+│   └── system/                      # processo, backup, ambiente
 ├── README.md
 └── .gitignore
 ```
