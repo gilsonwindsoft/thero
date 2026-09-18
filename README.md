@@ -335,15 +335,17 @@ e crescimento sem acoplar regras de negócio diferentes no mesmo arquivo.
 
 ## Known issues
 
-- O repositório `agents-inc/skills` atualmente falha para praticamente
-  todas as skills listadas (0 instaladas em testes reais). Os demais
-  repositórios funcionam parcialmente (algumas skills individuais podem
-  ter sido renomeadas/removidas). Use `SKILLS_INSTALL_FAILED.md` para ver
-  exatamente o que falhou.
+- **Zeus** (planejador que cruzaria o pedido do usuário com o índice
+  da Athena) ainda não foi implementado — apenas planejado.
 - Comando de atalho (`--install-command`) no macOS/Linux é novo:
   validado via Git Bash no Windows (`bash -n` e execução real da
   função gerada), mas zsh/bash reais em macOS/Linux ainda não foram
   testados.
+- Os catálogos `darasoba/agent-skills` e `supabase/agent-skills`
+  nunca apareceram em falhas de instalação em testes reais, mas não
+  foram verificados isoladamente skill por skill (baixa prioridade).
+  Se alguma skill nova sumir/for renomeada no repositório, ela
+  aparece em `SKILLS_INSTALL_FAILED.md` sem interromper as demais.
 
 ## Troubleshooting
 
