@@ -321,6 +321,80 @@ Se a consolidação falhar (Claude indisponível, erro na chamada, saída
 vazia ou validação reprovada), o arquivo original **permanece intacto**
 e um aviso é impresso.
 
+## O que muda no Claude depois de instalar
+
+Rodar o `thero` não é "instalar um programa" — é escrever dois tipos
+de arquivo que o Claude Code já sabe ler sozinho: `CLAUDE.md`
+(comportamento) e Agent Skills (conhecimento especializado). O
+`thero` termina, mas o efeito só aparece na **próxima sessão** do
+Claude Code (por isso ele sempre lembra "reinicie o Claude Code").
+
+```
+thero (roda uma vez)
+        |
+        v
+~/.claude/CLAUDE.md escrito      ~/.claude/skills/<nome>/ copiadas
+(Engineering Operating System)    (Supabase, React, Caveman, ...)
+        |                                    |
+        +-------------------+----------------+
+                            |
+                            v
+        você reinicia o Claude Code / abre um terminal novo
+                            |
+                            v
+        toda sessão nova carrega os dois automaticamente
+                            |
+                            v
+        Claude já responde seguindo as regras, sem você pedir
+```
+
+Na prática, isso significa que **antes mesmo de você digitar
+qualquer coisa**, uma sessão nova do Claude Code já carregou:
+
+1. **As regras do `CLAUDE.md`** — fidelidade ao pedido, diff mínimo,
+   segurança, formato de resposta final, etc. (as 21 regras do
+   "Engineering Operating System" que o `thero` escreve).
+2. **A lista de Agent Skills instaladas** — conhecimento
+   especializado (React, Supabase, Stripe, TypeScript...) que só é
+   ativado quando a tarefa pede aquele assunto, para não inflar o
+   contexto à toa.
+
+Dois efeitos são visíveis **desde a primeira mensagem** da sessão,
+sem você precisar pedir nada:
+
+- **Respostas comprimidas por padrão** (regra ##21, "Caveman"): se a
+  skill `caveman` foi instalada, o Claude já responde no estilo
+  terse/comprimido desde o "oi" inicial — não é preciso digitar
+  `/caveman` ou pedir "seja breve". Se a resposta vier longa e
+  formal desde o início, é sinal de que o `CLAUDE.md` não foi escrito
+  ou não foi carregado (reinicie o Claude Code na pasta certa).
+- **Contexto de arquitetura, se existir** (regra ##20): se o projeto
+  já tem `.athena/summary.md` (gerado por `thero --index`, o
+  [Athena](https://github.com/netovieira/athena)) ou
+  `.claude/zeus-plan.md` (gerado por `thero --plan "<tarefa>"`, o
+  [Zeus](https://github.com/netovieira/zeus)), o Claude consulta
+  esses resumos antes de abrir arquivo por arquivo — mais rápido,
+  sem precisar reindexar do zero a cada pergunta.
+
+Como confirmar isso "na prática", numa sessão nova:
+
+```
+1. cd no projeto onde o thero rodou (ou abra um terminal novo, se foi --global)
+2. Pergunte: "quais skills você tem disponíveis agora?"
+   -> deve listar as skills instaladas pelo thero (Supabase, React, Caveman, ...)
+3. Observe a PRIMEIRA resposta da sessão
+   -> deve já vir comprimida/terse, sem você pedir "seja breve"
+4. Se o projeto tiver .athena/ ou .claude/zeus-plan.md, peça algo que
+   exija explorar o código
+   -> a resposta deve citar os resumos em vez de reabrir cada arquivo
+```
+
+Se nenhum desses sinais aparecer, o `CLAUDE.md`/as skills não foram
+carregados nessa sessão — confira se o `thero` rodou na pasta certa
+(`--local` vs global) e se você de fato abriu uma sessão **nova**
+depois (sessões já abertas antes de rodar o `thero` não recarregam
+sozinhas).
+
 ## Estrutura do projeto
 
 ```
