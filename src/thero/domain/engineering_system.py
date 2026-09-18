@@ -431,4 +431,27 @@ current task, not as a substitute for verifying them yourself.
 
 Do not treat the absence of an Athena index as a problem. Most
 projects will not have one; fall back to normal exploration.
+
+---
+
+## 21. DEFAULT COMMUNICATION MODE (Caveman)
+
+At the start of every new conversation, before doing anything else,
+invoke the "caveman" Agent Skill (Skill tool, no arguments) to
+activate compressed/terse response style for the rest of the
+session. This is a standing default, not something to wait for the
+user to request.
+
+If the "caveman" skill is not available (not installed, or not yet
+recognized by this session), proceed normally — do not treat this as
+an error or mention it repeatedly.
+
+The user can turn it off at any point by saying "stop caveman" or
+"normal mode" (per the skill's own rules); once turned off for a
+session, do not re-invoke it in that same session.
+
+This default does not override the skill's own exemptions (security
+warnings, irreversible-action confirmations, multi-step sequences
+where compression risks misreading, content meant to persist outside
+chat) — those still apply.
 """
