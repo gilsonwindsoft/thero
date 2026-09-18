@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Artefatos gerados em tempo de execução (não versionar)
+CLAUDE_AUDIT.md
+SKILLS_INSTALL_FAILED.md
+*.local.ps1
+*.backup_*
+.CLAUDE.md.tmp_*
+
+# Editor / OS
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store
