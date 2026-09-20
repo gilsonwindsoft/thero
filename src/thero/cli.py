@@ -43,7 +43,7 @@ COMANDOS
                        (padrao: "%s"), sem mexer em skills nem no
                        CLAUDE.md.
     --index            Roda a Athena (indexador de arquitetura,
-                       github.com/netovieira/athena) na pasta
+                       github.com/theroverse/athena) na pasta
                        atual, se estiver instalada. Nao instala
                        skills, nem mexe no CLAUDE.md/comando.
     --check            Verifica se alguma skill instalada (via
@@ -128,7 +128,7 @@ COMANDO LOCAL (--install-command --local)
     CLAUDE.md tambem ficam locais ao projeto).
 
 ATHENA (--index)
-    A Athena (github.com/netovieira/athena) indexa a arquitetura do
+    A Athena (github.com/theroverse/athena) indexa a arquitetura do
     projeto atual em ./.athena, resumindo arquivos e pastas via
     Claude. "--index" procura athena.py na pasta irma "athena/"
     (layout padrao do monorepo myscripts) ou no caminho apontado pela
@@ -143,7 +143,7 @@ ATHENA (--index)
     arquivo do zero.
 
 ZEUS (--plan TAREFA)
-    O Zeus (github.com/netovieira/zeus) cruza a tarefa descrita com o
+    O Zeus (github.com/theroverse/zeus) cruza a tarefa descrita com o
     indice da Athena do projeto atual via "claude -p" e escreve um
     plano candidato em .claude/zeus-plan.md. "--plan" localiza
     zeus.py na variavel de ambiente THERO_ZEUS_PATH, na pasta irma
@@ -295,7 +295,7 @@ def parse_args() -> argparse.Namespace:
         "--index",
         action="store_true",
         help=(
-            "Run Athena (https://github.com/netovieira/athena) to "
+            "Run Athena (https://github.com/theroverse/athena) to "
             "index the current project's architecture into "
             "./.athena, if Athena is installed. Does not install "
             "skills, touch CLAUDE.md, or manage the shortcut "
@@ -304,11 +304,23 @@ def parse_args() -> argparse.Namespace:
     )
 
     parser.add_argument(
+        "--max-files",
+        type=int,
+        default=None,
+        metavar="N",
+        help=(
+            "Used with --index: forwarded to Athena's own "
+            "--max-files, to raise the safety limit on how many "
+            "files it will index in one run."
+        ),
+    )
+
+    parser.add_argument(
         "--plan",
         metavar="TASK",
         default=None,
         help=(
-            "Run Zeus (https://github.com/netovieira/zeus) to plan "
+            "Run Zeus (https://github.com/theroverse/zeus) to plan "
             "TASK against the current project's Athena index, "
             "writing .claude/zeus-plan.md. Installs/updates Zeus "
             "automatically the same way --index does for Athena "
@@ -376,7 +388,7 @@ def main(entry_path: Path) -> None:
 
     if args.index:
 
-        if not run_athena_index(entry_path):
+        if not run_athena_index(entry_path, max_files=args.max_files):
             sys.exit(1)
 
         return

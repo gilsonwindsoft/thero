@@ -33,9 +33,9 @@ de quem já bateu a cabeça com isso.
 - **Zero dependências, zero risco.** Só Python (que você já tem se
   programa) e o próprio Claude Code. Nunca apaga nada seu — sempre
   faz backup antes de qualquer mudança.
-- **Parte de uma suíte**: o [Athena](https://github.com/netovieira/athena)
+- **Parte de uma suíte**: o [Athena](https://github.com/theroverse/athena)
   indexa a arquitetura do seu projeto pra o Claude não precisar reler
-  tudo do zero, e o [Zeus](https://github.com/netovieira/zeus) planeja
+  tudo do zero, e o [Zeus](https://github.com/theroverse/zeus) planeja
   uma tarefa antes de você pedir pro Claude executar. Os três se
   integram (veja [Athena e Zeus](#athena-e-zeus) abaixo), mas cada um
   funciona sozinho.
@@ -82,7 +82,7 @@ apenas a consolidação do `CLAUDE.md` e a auditoria são puladas (com aviso).
 Não há instalação via `pip`. Basta clonar e rodar:
 
 ```
-git clone https://github.com/netovieira/thero.git
+git clone https://github.com/theroverse/thero.git
 cd thero
 python thero.py
 ```
@@ -103,8 +103,8 @@ python thero.py [opções]
 | `--audit-only`               | Audita o projeto atual (somente leitura), sem instalar nada.       |
 | `--audit`                    | Executa o fluxo completo e, em seguida, audita o projeto atual.    |
 | `--install-command [NOME]`   | Instala/atualiza somente o comando de atalho (padrão: `thero`). Sem `NOME`, pergunta interativamente (Enter aceita o sugerido). |
-| `--index`                    | Roda a [Athena](https://github.com/netovieira/athena) na pasta atual (indexa a arquitetura em `.athena/`); instala/atualiza automaticamente via git se preciso e o terminal for interativo. |
-| `--plan TAREFA`              | Roda o [Zeus](https://github.com/netovieira/zeus) na pasta atual para planejar `TAREFA` (escreve `.claude/zeus-plan.md`); instala/atualiza automaticamente via git, mesmo mecanismo do `--index`. |
+| `--index`                    | Roda a [Athena](https://github.com/theroverse/athena) na pasta atual (indexa a arquitetura em `.athena/`); instala/atualiza automaticamente via git se preciso e o terminal for interativo. |
+| `--plan TAREFA`              | Roda o [Zeus](https://github.com/theroverse/zeus) na pasta atual para planejar `TAREFA` (escreve `.claude/zeus-plan.md`); instala/atualiza automaticamente via git, mesmo mecanismo do `--index`. |
 | `--check`                    | Verifica se alguma skill instalada tem atualização disponível (`npx skills check` + `npx impeccable check`). |
 | `--update`                   | Atualiza as skills instaladas para a versão mais recente (`npx skills update` + `npx impeccable update`). |
 | `--local`                    | Faz tudo (`CLAUDE.md`, skills, comando) mirar a pasta do projeto atual em vez do usuário global. Combina com qualquer outra flag. |
@@ -251,7 +251,7 @@ Rodar a instalação de novo (global ou local) atualiza a função existente
 
 ## Athena e Zeus
 
-O `thero` pode se integrar com a [Athena](https://github.com/netovieira/athena)
+O `thero` pode se integrar com a [Athena](https://github.com/theroverse/athena)
 (indexador recursivo de arquitetura via Claude Code) como parte do
 fluxo de trabalho, não só como instalação:
 
@@ -266,12 +266,12 @@ fluxo de trabalho, não só como instalação:
   `git` instalado; em sessão não interativa (ex.: agente de IA), pula
   o clone/update automático em vez de travar esperando confirmação.
 - O `CLAUDE.md` que o `thero` gera/consolida já instrui o Claude a
-  checar `.athena/summary.md` e `.athena/tree/**` antes de explorar um
+  checar `.athena/summary.atn.md` e `.athena/tree/**` antes de explorar um
   projeto desconhecido, usando os resumos como primeira fonte de
   contexto em vez de reler cada arquivo do zero (cai de volta pro
   arquivo real quando o resumo não é suficiente).
 
-[**Zeus**](https://github.com/netovieira/zeus) — um planejador que
+[**Zeus**](https://github.com/theroverse/zeus) — um planejador que
 cruza o pedido do usuário com o índice da Athena (via `claude -p`)
 para decidir quais arquivos importam para uma tarefa — pode rodar
 tanto standalone (`python zeus.py plan "<tarefa>" [pasta]`) quanto
@@ -393,10 +393,10 @@ sem você precisar pedir nada:
   formal desde o início, é sinal de que o `CLAUDE.md` não foi escrito
   ou não foi carregado (reinicie o Claude Code na pasta certa).
 - **Contexto de arquitetura, se existir** (regra ##20): se o projeto
-  já tem `.athena/summary.md` (gerado por `thero --index`, o
-  [Athena](https://github.com/netovieira/athena)) ou
+  já tem `.athena/summary.atn.md` (gerado por `thero --index`, o
+  [Athena](https://github.com/theroverse/athena)) ou
   `.claude/zeus-plan.md` (gerado por `thero --plan "<tarefa>"`, o
-  [Zeus](https://github.com/netovieira/zeus)), o Claude consulta
+  [Zeus](https://github.com/theroverse/zeus)), o Claude consulta
   esses resumos antes de abrir arquivo por arquivo — mais rápido,
   sem precisar reindexar do zero a cada pergunta.
 

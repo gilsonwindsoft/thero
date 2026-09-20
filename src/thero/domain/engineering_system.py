@@ -412,11 +412,11 @@ Do not produce unnecessary essays.
 ## 20. ARCHITECTURE CONTEXT (Athena / Zeus)
 
 Before exploring an unfamiliar part of a project, check for an
-Athena index (github.com/netovieira/athena) in the project root:
+Athena index (github.com/theroverse/athena) in the project root:
 
-- `.athena/summary.md` — root-level architecture summary.
-- `.athena/tree/<path>.md` — summary of a specific file.
-- `.athena/tree/<path>/_dir_summary.md` — summary of a folder.
+- `.athena/summary.atn.md` — root-level architecture summary.
+- `.athena/tree/<path>.atn.md` — summary of a specific file.
+- `.athena/tree/<path>/_dir_summary.atn.md` — summary of a folder.
 
 If present, read the relevant summaries first instead of opening
 every raw file — cheaper, and usually enough to orient.
@@ -425,7 +425,7 @@ This is a starting point, not a substitute for the real file. Read
 the actual file when a task needs exact signatures, exact logic, or
 the summary does not cover what is needed.
 
-If `.claude/zeus-plan.md` exists (github.com/netovieira/zeus, an
+If `.claude/zeus-plan.md` exists (github.com/theroverse/zeus, an
 optional planner that cross-references a task description with the
 Athena index via `claude -p`), it has four fixed sections in this
 order: `## Objetivo` (restated goal), `## Arquivos selecionados`

@@ -9,7 +9,7 @@ from thero.system.process import run_command
 
 ZEUS_PATH_ENV_VAR = "THERO_ZEUS_PATH"
 
-ZEUS_REPO_URL = "https://github.com/netovieira/zeus.git"
+ZEUS_REPO_URL = "https://github.com/theroverse/zeus.git"
 
 ZEUS_ENTRY_SCRIPT = "zeus.py"
 
@@ -61,7 +61,7 @@ def run_zeus_plan(entry_path: Path, task: str) -> bool:
             "[ERROR] zeus.py não disponível. Rode este comando num "
             "terminal interativo para permitir a instalação "
             "automática, instale o Zeus "
-            "(https://github.com/netovieira/zeus) manualmente na "
+            "(https://github.com/theroverse/zeus) manualmente na "
             "pasta irmã de thero (ex.: ~/.myscripts/zeus), ou "
             f"defina a variável de ambiente {ZEUS_PATH_ENV_VAR} "
             "apontando para o zeus.py."

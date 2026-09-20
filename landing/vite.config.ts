@@ -6,7 +6,7 @@
 // You can pass additional config via defineConfig({ vite: { ... }, etc... }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
-// GitHub Pages serves project sites under a repo sub-path, e.g. netovieira.github.io/thero/.
+// GitHub Pages serves project sites under a repo sub-path, e.g. theroverse.github.io/thero/.
 // Vite's `base` rewrites every emitted asset URL, and the router `basepath` (see src/router.tsx)
 // keeps client navigation in sync with it. Both are derived from the same value.
 const BASE_PATH = "/thero/";

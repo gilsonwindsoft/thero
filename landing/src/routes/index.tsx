@@ -26,7 +26,7 @@ import profileAssetUrl from "../assets/anthero-profile.jpg";
 import theroMark from "../assets/thero-mark.png";
 import systemImage from "../assets/thero-system.jpg";
 
-const GITHUB = "https://github.com/netovieira/thero";
+const GITHUB = "https://github.com/theroverse/thero";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -43,10 +43,10 @@ export const Route = createFileRoute("/")({
         content: "Uma suíte open-source para preparar, contextualizar e planejar seu trabalho com Claude Code.",
       },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://netovieira.github.io/thero/" },
+      { property: "og:url", content: "https://theroverse.github.io/thero/" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
-    links: [{ rel: "canonical", href: "https://netovieira.github.io/thero/" }],
+    links: [{ rel: "canonical", href: "https://theroverse.github.io/thero/" }],
   }),
   component: Index,
 });
@@ -218,13 +218,13 @@ function Index() {
               <div className="suite-number">02</div>
               <div className="suite-icon"><Network /></div>
               <div className="suite-copy"><span>Entenda</span><h3>Athena</h3><p>Transforma o repositório em uma planta baixa: resumos de arquivos e pastas, de baixo para cima, com cache incremental por hash.</p></div>
-              <a href="https://github.com/netovieira/athena" target="_blank" rel="noreferrer">Conhecer a Athena <ArrowRight size={16} /></a>
+              <a href="https://github.com/theroverse/athena" target="_blank" rel="noreferrer">Conhecer a Athena <ArrowRight size={16} /></a>
             </article>
             <article className="suite-item zeus-item">
               <div className="suite-number">03</div>
               <div className="suite-icon"><Zap /></div>
               <div className="suite-copy"><span>Planeje</span><h3>Zeus</h3><p>Cruza sua tarefa com o índice da Athena, identifica arquivos relevantes, riscos e passos antes de pedir a execução.</p></div>
-              <a href="https://github.com/netovieira/zeus" target="_blank" rel="noreferrer">Conhecer o Zeus <ArrowRight size={16} /></a>
+              <a href="https://github.com/theroverse/zeus" target="_blank" rel="noreferrer">Conhecer o Zeus <ArrowRight size={16} /></a>
             </article>
           </div>
           <div className="system-image-wrap">
@@ -288,7 +288,7 @@ function Index() {
           <div className="install-terminal">
             <div className="terminal-bar"><i /><i /><i /><span>instalação</span></div>
             <div className="install-commands">
-              <CopyCommand command="git clone https://github.com/netovieira/thero.git" compact />
+              <CopyCommand command="git clone https://github.com/theroverse/thero.git" compact />
               <CopyCommand command="cd thero" compact />
               <CopyCommand command="python thero.py" compact />
             </div>
@@ -327,7 +327,18 @@ function Index() {
           <p>Open source, transparente e pronto para seu próximo projeto.</p>
           <div className="hero-actions">
             <a className="button button-primary" href={GITHUB} target="_blank" rel="noreferrer"><Github size={18} /> Começar no GitHub</a>
-            <a className="button button-dark-outline" href="https://github.com/netovieira/thero/blob/master/README.md" target="_blank" rel="noreferrer">Ler documentação <ArrowRight size={17} /></a>
+            <a className="button button-dark-outline" href="https://github.com/theroverse/thero/blob/master/README.md" target="_blank" rel="noreferrer">Ler documentação <ArrowRight size={17} /></a>
+          </div>
+        </div>
+      </section>
+
+      <section className="final-cta theroverse-cta">
+        <div className="shell final-inner">
+          <span className="section-kicker">Parte de um ecossistema maior</span>
+          <h2>Thero é uma peça do <em>Theroverse</em>.</h2>
+          <p>Thero comanda, Athena mapeia o projeto, Zeus planeja antes de qualquer mudança — conheça as outras ferramentas abertas do ecossistema.</p>
+          <div className="hero-actions">
+            <a className="button button-primary" href="https://theroverse.github.io/" target="_blank" rel="noreferrer">Explorar o Theroverse <ArrowRight size={17} /></a>
           </div>
         </div>
       </section>
@@ -336,7 +347,7 @@ function Index() {
         <div className="shell footer-inner">
           <a href="#top" className="brand"><img src={theroMark} alt="" width={36} height={36} loading="lazy" /><span>thero</span></a>
           <p>Claude Code pronto para trabalho sério.</p>
-          <div><a href="https://github.com/netovieira/athena" target="_blank" rel="noreferrer">Athena</a><a href="https://github.com/netovieira/zeus" target="_blank" rel="noreferrer">Zeus</a><a href="https://github.com/netovieira/thero/blob/master/LICENSE" target="_blank" rel="noreferrer">MIT License</a></div>
+          <div><a href="https://theroverse.github.io/" target="_blank" rel="noreferrer">Theroverse</a><a href="https://theroverse.github.io/athena/" target="_blank" rel="noreferrer">Athena</a><a href="https://theroverse.github.io/zeus/" target="_blank" rel="noreferrer">Zeus</a><a href="https://github.com/theroverse/thero/blob/master/LICENSE" target="_blank" rel="noreferrer">MIT License</a></div>
           <small>© 2026 Anthero Vieira Neto</small>
         </div>
       </footer>

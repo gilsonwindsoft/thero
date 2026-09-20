@@ -100,18 +100,28 @@ def test_install_global_command_posix_reinstall_does_not_duplicate(tmp_path):
     assert content.count(COMMAND_MARKER_END) == 1
 
 
-def _usable_bash() -> bool:
-    """True only when a *functional* POSIX bash is reachable.
+def _find_usable_bash():
+    """Absolute path to a *functional* POSIX bash, or None.
 
-    On Windows CI ``shutil.which("bash")`` can resolve to the WSL launcher stub
-    (System32\\bash.exe). That stub exists on PATH but, with no installed Linux
-    distribution, prints a UTF-16 "Windows Subsystem for Linux has no installed
-    distributions" notice and exits non-zero. A mere presence check would run the
-    tests against it and fail spuriously, so we execute a probe command instead.
+    Two Windows-specific hazards are handled here:
+
+    1. ``shutil.which("bash")`` can resolve to the WSL launcher stub
+       (System32\\bash.exe). That stub exists on PATH but, with no installed
+       Linux distribution, prints a UTF-16 "Windows Subsystem for Linux has no
+       installed distributions" notice and exits non-zero. A mere presence check
+       would run the tests against it and fail spuriously, so we execute a probe
+       command instead.
+
+    2. The returned *absolute path* is what the tests must invoke. Calling a
+       bare ``"bash"`` through ``subprocess`` lets ``CreateProcess`` re-resolve
+       the name via a different search order (the WindowsApps alias / System32
+       stub can win over Git's bin), so the guard and the subject would target
+       different binaries. Pinning to the validated path keeps them consistent:
+       either both use a working bash or the tests are skipped.
     """
     exe = shutil.which("bash")
     if exe is None:
-        return False
+        return None
     try:
         probe = subprocess.run(
             [exe, "-c", "printf bash_ok"],
@@ -120,13 +130,15 @@ def _usable_bash() -> bool:
             timeout=15,
         )
     except (subprocess.SubprocessError, OSError):
-        return False
-    return probe.returncode == 0 and "bash_ok" in (probe.stdout or "")
+        return None
+    if probe.returncode == 0 and "bash_ok" in (probe.stdout or ""):
+        return exe
+    return None
 
 
-bash_usable = _usable_bash()
+BASH_EXE = _find_usable_bash()
 requires_bash = pytest.mark.skipif(
-    not bash_usable, reason="no functional POSIX bash on this runner"
+    BASH_EXE is None, reason="no functional POSIX bash on this runner"
 )
 
 
@@ -137,10 +149,11 @@ def test_generated_local_script_has_valid_bash_syntax(tmp_path, monkeypatch):
     install_local_command_posix("mycmd", tmp_path / "thero.py")
 
     target = tmp_path / "mycmd.local.sh"
-    # Pass a relative name with cwd set: Git Bash on Windows cannot resolve a
-    # backslash-qualified absolute path (str(target)) and exits 127.
+    # Invoke the validated BASH_EXE (not a bare "bash") with a relative name and
+    # cwd set: Git Bash cannot resolve a backslash-qualified absolute path
+    # (str(target)) and exits 127.
     result = subprocess.run(
-        ["bash", "-n", target.name],
+        [BASH_EXE, "-n", target.name],
         capture_output=True,
         text=True,
         cwd=tmp_path,
@@ -157,7 +170,7 @@ def test_generated_local_script_function_runs_in_real_bash(tmp_path, monkeypatch
 
     target = tmp_path / "mycmd.local.sh"
     result = subprocess.run(
-        ["bash", "-c", f"source ./{target.name} && type mycmd"],
+        [BASH_EXE, "-c", f"source ./{target.name} && type mycmd"],
         capture_output=True,
         text=True,
         cwd=tmp_path,
@@ -177,7 +190,7 @@ def test_generated_global_rc_block_has_valid_bash_syntax(tmp_path):
         install_global_command_posix("mycmd", tmp_path / "thero.py")
 
     result = subprocess.run(
-        ["bash", "-n", rc_path.name],
+        [BASH_EXE, "-n", rc_path.name],
         capture_output=True,
         text=True,
         cwd=tmp_path,
