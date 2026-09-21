@@ -87,6 +87,42 @@ def test_run_zeus_plan_builds_correct_command(tmp_path):
     assert called_command[3] == "do the thing"
 
 
+def test_run_zeus_plan_omits_context_flag_by_default(tmp_path):
+    zeus_script = tmp_path / "zeus.py"
+
+    with patch(
+        "thero.integrations.zeus_bridge.find_zeus_script",
+        return_value=zeus_script,
+    ), patch(
+        "thero.integrations.zeus_bridge.run_command",
+        return_value=MagicMock(returncode=0),
+    ) as mock_run:
+        run_zeus_plan(tmp_path / "thero.py", "do the thing")
+
+    called_command = mock_run.call_args.args[0]
+    assert "--context" not in called_command
+
+
+def test_run_zeus_plan_forwards_context_flag(tmp_path):
+    zeus_script = tmp_path / "zeus.py"
+
+    with patch(
+        "thero.integrations.zeus_bridge.find_zeus_script",
+        return_value=zeus_script,
+    ), patch(
+        "thero.integrations.zeus_bridge.run_command",
+        return_value=MagicMock(returncode=0),
+    ) as mock_run:
+        run_zeus_plan(
+            tmp_path / "thero.py",
+            "do the thing",
+            context="/some/monorepo",
+        )
+
+    called_command = mock_run.call_args.args[0]
+    assert called_command[-2:] == ["--context", "/some/monorepo"]
+
+
 def test_run_zeus_plan_propagates_failure_returncode(tmp_path):
     with patch(
         "thero.integrations.zeus_bridge.find_zeus_script",

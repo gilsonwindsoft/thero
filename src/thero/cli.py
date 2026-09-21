@@ -46,6 +46,9 @@ COMANDOS
                        github.com/theroverse/athena) na pasta
                        atual, se estiver instalada. Nao instala
                        skills, nem mexe no CLAUDE.md/comando.
+    --plan TAREFA      Roda o Zeus para planejar TAREFA (ver
+                       secao ZEUS). Nao instala skills, nem mexe
+                       no CLAUDE.md/comando.
     --check            Verifica se alguma skill instalada (via
                        "npx skills" e "impeccable") tem atualizacao
                        disponivel. Nao instala nem muda nada.
@@ -76,6 +79,8 @@ EXEMPLOS
     python thero.py --install-command meunome
     python thero.py --index
     python thero.py --plan "adicionar campo de telefone no cadastro de usuario"
+    %s plan "adicionar campo de telefone no cadastro de usuario"
+    python thero.py --plan "criar a nave Vector" --plan-context C:\Users\x\monorepo
     python thero.py --check
     python thero.py --update
     python thero.py --help
@@ -108,6 +113,7 @@ COMANDO GLOBAL (PowerShell, ou bash/zsh no macOS/Linux)
         %s index        -> --index
         %s check        -> --check
         %s update       -> --update
+        %s plan TAREFA  -> --plan "TAREFA"
         %s help         -> --help
     Qualquer outro argumento (ex.: "%s -h") e repassado cru para
     o script. Rodar a instalacao de novo so atualiza a funcao
@@ -150,10 +156,19 @@ ZEUS (--plan TAREFA)
     "zeus/" (layout do monorepo myscripts), ou instala/atualiza
     automaticamente em ~/.thero/tools/zeus — exatamente o mesmo
     mecanismo de "--index" para a Athena, com confirmacao e mesma
-    regra de sessao nao interativa. Nao e um subcomando do atalho
-    global (ex.: "thero plan" nao existe); use
-    'thero --plan "<tarefa>"' diretamente (repassado cru pelo
-    atalho, como qualquer flag nao mapeada).
+    regra de sessao nao interativa. O atalho global tambem aceita
+    isso como subcomando: '%s plan "<tarefa>"' equivale a
+    'thero --plan "<tarefa>"' (o restante dos argumentos e
+    concatenado num unico texto para --plan).
+
+    --plan-context PASTA indexa PASTA em vez da pasta atual para
+    gerar os resumos usados no plano, mas ainda escreve o plano
+    dentro da pasta atual. Util quando o projeto sendo planejado e
+    novo/isolado dentro de um monorepo (ex.: uma pasta recem-criada
+    pra uma ferramenta nova) mas deveria seguir a convencao dos
+    projetos irmaos (estrutura de pastas, arquivo de dependencias,
+    padrao de CLI, testes) em vez do Claude decidir tudo do zero sem
+    ver esse contexto: aponte --plan-context pra raiz do monorepo.
 
 SKILLS
     Skills sao instaladas individualmente a partir de repositorios
@@ -206,7 +221,7 @@ Documentacao completa: README.md (mesma pasta deste script).
 """
 
 HELP_EPILOG = _HELP_EPILOG_TEMPLATE % (
-    (DEFAULT_COMMAND_NAME,) * 15
+    (DEFAULT_COMMAND_NAME,) * 18
 )
 
 
@@ -331,6 +346,23 @@ def parse_args() -> argparse.Namespace:
     )
 
     parser.add_argument(
+        "--plan-context",
+        metavar="FOLDER",
+        default=None,
+        help=(
+            "Used with --plan: index FOLDER instead of the current "
+            "directory to generate the architecture summaries the "
+            "plan is based on, while still writing the plan inside "
+            "the current directory. Useful for a new/isolated "
+            "project inside a monorepo that should follow sibling "
+            "projects' conventions (folder layout, dependency "
+            "manifest, CLI style, tests) instead of deciding "
+            "everything from scratch — point this at the monorepo "
+            "root."
+        ),
+    )
+
+    parser.add_argument(
         "--check",
         action="store_true",
         help=(
@@ -399,7 +431,11 @@ def main(entry_path: Path) -> None:
 
     if args.plan is not None:
 
-        if not run_zeus_plan(entry_path, args.plan):
+        if not run_zeus_plan(
+            entry_path,
+            args.plan,
+            context=args.plan_context,
+        ):
             sys.exit(1)
 
         return

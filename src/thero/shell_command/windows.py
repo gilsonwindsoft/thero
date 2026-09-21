@@ -94,6 +94,9 @@ def install_local_command_windows(
         f"    {command_name} audit-only   -> --audit-only --local"
     )
     print(
+        f"    {command_name} plan TAREFA  -> --plan TAREFA --local"
+    )
+    print(
         f"    {command_name} help         -> --help"
     )
     print(
@@ -179,6 +182,9 @@ def install_global_command_windows(
     )
     print(
         f"    {command_name} audit-only   -> --audit-only"
+    )
+    print(
+        f"    {command_name} plan TAREFA  -> --plan TAREFA"
     )
     print(
         f"    {command_name} help         -> --help"

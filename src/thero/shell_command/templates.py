@@ -29,6 +29,12 @@ function %s {
     if ([string]::IsNullOrEmpty($Command)) {
         $flags = @()
     }
+    elseif ($Command -eq 'plan') {
+        # 'plan' leva uma TASK; junta o restante dos argumentos
+        # num unico texto para --plan.
+        $flags = @('--plan', ($Rest -join ' '))
+        $Rest = @()
+    }
     elseif ($flagMap.ContainsKey($Command)) {
         $flags = $flagMap[$Command]
     }
@@ -89,6 +95,12 @@ function %(command_name)s {
     if ([string]::IsNullOrEmpty($Command)) {
         $flags = @()
     }
+    elseif ($Command -eq 'plan') {
+        # 'plan' leva uma TASK; junta o restante dos argumentos
+        # num unico texto para --plan.
+        $flags = @('--plan', ($Rest -join ' '))
+        $Rest = @()
+    }
     elseif ($flagMap.ContainsKey($Command)) {
         $flags = $flagMap[$Command]
     }
@@ -134,6 +146,7 @@ GLOBAL_COMMAND_TEMPLATE_POSIX = r"""# >>> setup_claude global command >>>
         check) set -- --check ;;
         update) set -- --update ;;
         help) set -- --help ;;
+        plan) set -- --plan "$*" ;;
         *) set -- "$cmd" "$@" ;;
     esac
 
@@ -178,6 +191,7 @@ LOCAL_COMMAND_TEMPLATE_POSIX = r"""# Comando local do projeto: %(project_dir)s
         check) set -- --check ;;
         update) set -- --update ;;
         help) set -- --help ;;
+        plan) set -- --plan "$*" ;;
         *) set -- "$cmd" "$@" ;;
     esac
 

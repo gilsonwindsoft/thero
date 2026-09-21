@@ -47,7 +47,12 @@ def find_zeus_script(entry_path: Path) -> Path | None:
     )
 
 
-def run_zeus_plan(entry_path: Path, task: str) -> bool:
+def run_zeus_plan(
+    entry_path: Path,
+    task: str,
+    *,
+    context: str | None = None,
+) -> bool:
 
     print()
     print("=" * 70)
@@ -70,16 +75,21 @@ def run_zeus_plan(entry_path: Path, task: str) -> bool:
 
     project_dir = str(Path.cwd())
 
+    command = [
+        "python",
+        str(zeus_script),
+        "plan",
+        task,
+        project_dir,
+    ]
+
+    if context is not None:
+        command += ["--context", context]
+
     sys.stdout.flush()
 
     result = run_command(
-        [
-            "python",
-            str(zeus_script),
-            "plan",
-            task,
-            project_dir,
-        ],
+        command,
         capture=False,
     )
 

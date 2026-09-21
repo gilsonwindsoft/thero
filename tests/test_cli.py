@@ -77,6 +77,17 @@ def test_parse_args_plan_with_task(monkeypatch):
     args = parse_args()
 
     assert args.plan == "do the thing"
+    assert args.plan_context is None
+
+
+def test_parse_args_plan_with_context(monkeypatch):
+    set_argv(
+        monkeypatch, "--plan", "do the thing", "--plan-context", "/some/monorepo"
+    )
+
+    args = parse_args()
+
+    assert args.plan_context == "/some/monorepo"
 
 
 def test_parse_args_combines_local_with_other_flags(monkeypatch):
@@ -168,7 +179,21 @@ def test_main_plan_success_returns_without_exit(tmp_path, monkeypatch, mocks):
 
     main(tmp_path / "thero.py")
 
-    mocks["run_zeus_plan"].assert_called_once_with(tmp_path / "thero.py", "do the thing")
+    mocks["run_zeus_plan"].assert_called_once_with(
+        tmp_path / "thero.py", "do the thing", context=None
+    )
+
+
+def test_main_plan_forwards_plan_context(tmp_path, monkeypatch, mocks):
+    set_argv(
+        monkeypatch, "--plan", "do the thing", "--plan-context", "/some/monorepo"
+    )
+
+    main(tmp_path / "thero.py")
+
+    mocks["run_zeus_plan"].assert_called_once_with(
+        tmp_path / "thero.py", "do the thing", context="/some/monorepo"
+    )
 
 
 def test_main_plan_failure_exits(tmp_path, monkeypatch):
