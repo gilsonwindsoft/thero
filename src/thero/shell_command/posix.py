@@ -17,6 +17,20 @@ POSIX_SUPPORT_WARNING = (
 )
 
 
+def _write_text_lf(path: Path, text: str) -> None:
+    """
+    Escreve texto forcando terminadores LF.
+
+    Path.write_text() so aceita o argumento 'newline' a partir do
+    Python 3.10; em versoes mais antigas (ex.: o Python 3.9 que ainda
+    vem por padrao em alguns macOS) isso gera
+    TypeError: write_text() got an unexpected keyword argument 'newline'.
+    Usamos open() com 'newline', que existe em qualquer Python 3.x.
+    """
+    with path.open("w", encoding="utf-8", newline="\n") as handle:
+        handle.write(text)
+
+
 def resolve_shell_rc_file() -> Path:
     """
     Escolhe o arquivo de perfil do shell a editar, com base na
@@ -60,11 +74,7 @@ def install_local_command_posix(
     # breaks bash ("syntax error near unexpected token `$'{\r'`") when thero
     # is run under Git Bash on Windows. write_text() would otherwise emit the
     # host os.linesep.
-    target.write_text(
-        content,
-        encoding="utf-8",
-        newline="\n",
-    )
+    _write_text_lf(target, content)
 
     print(
         f"[OK] Local command '{command_name}' created at:"
@@ -96,6 +106,9 @@ def install_local_command_posix(
     )
     print(
         f"    {command_name} audit-only   -> --audit-only --local"
+    )
+    print(
+        f"    {command_name} plan TAREFA  -> --plan TAREFA --local"
     )
     print(
         f"    {command_name} help         -> --help"
@@ -138,11 +151,7 @@ def install_global_command_posix(
 
     updated = upsert_marked_block(existing, block)
 
-    rc_path.write_text(
-        updated,
-        encoding="utf-8",
-        newline="\n",
-    )
+    _write_text_lf(rc_path, updated)
 
     print(
         f"[OK] Global command '{command_name}' installed in:"
@@ -177,6 +186,9 @@ def install_global_command_posix(
     )
     print(
         f"    {command_name} audit-only   -> --audit-only"
+    )
+    print(
+        f"    {command_name} plan TAREFA  -> --plan TAREFA"
     )
     print(
         f"    {command_name} help         -> --help"
